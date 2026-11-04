@@ -1,0 +1,124 @@
+<UserControl x:Class="Launcher.UI.Views.ProfilesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls">
+    <Grid Margin="40,8,40,28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="0,0,0,18">
+            <StackPanel>
+                <TextBlock Text="Профили" Style="{StaticResource Heading}" />
+                <TextBlock Text="Каждый профиль — своя версия игры и своя папка с мирами и модами."
+                           Style="{StaticResource Muted}" Margin="0,4,0,0" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel Margin="0,0,10,0">
+                <Button Style="{StaticResource GhostButton}" Command="{Binding ImportPackCommand}"
+                        ToolTip="Установить сборку из файла">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Glyph}" Text="&#xE896;" Margin="0,0,8,0" />
+                        <TextBlock Text="Импорт сборки" />
+                    </StackPanel>
+                </Button>
+                <TextBlock Style="{StaticResource Muted}" FontSize="11" Margin="2,4,0,0" TextAlignment="Center"
+                           Text=".mrpack (Modrinth) · .zip (CurseForge)" />
+                </StackPanel>
+                <Button Style="{StaticResource PrimaryButton}" Command="{Binding AddCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Glyph}" Text="&#xE710;" Margin="0,0,8,0" />
+                        <TextBlock Text="Новый профиль" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Visibility="{Binding Catalog.HasItems, Converter={StaticResource BoolToVis}}">
+            <ItemsControl ItemsSource="{Binding Catalog.Items}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Glass}" Width="276" Margin="0,0,16,16" Padding="18"
+                                CornerRadius="18" c:Motion.Appear="True">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="44" Height="44" CornerRadius="14" Background="{DynamicResource AccentSoftBrush}">
+                                        <Grid>
+                                        <Border CornerRadius="14" Background="{Binding IconBrush}"
+                                                Visibility="{Binding HasIcon, Converter={StaticResource BoolToVis}}" />
+                                        <TextBlock Text="{Binding Initial}" Visibility="{Binding NoIcon, Converter={StaticResource BoolToVis}}" FontSize="20" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Border>
+                                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center" MaxWidth="150">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding VersionText}" Style="{StaticResource Muted}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Muted}" FontSize="12" Margin="0,12,0,14" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Style="{StaticResource PrimaryButton}" Padding="0,8" c:Ui.CornerRadius="12"
+                                            Command="{Binding DataContext.PlayCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Visibility="{Binding IsIdle, Converter={StaticResource BoolToVis}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Style="{StaticResource Glyph}" Text="&#xE768;" FontSize="12" Margin="0,0,8,0" />
+                                            <TextBlock Text="Играть" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="0" Style="{StaticResource PrimaryButton}" Padding="0,8" c:Ui.CornerRadius="12"
+                                            IsEnabled="False" Content="Запуск…"
+                                            Visibility="{Binding IsPreparing, Converter={StaticResource BoolToVis}}" />
+                                    <Button Grid.Column="0" Style="{StaticResource DangerButton}" Padding="0,8" c:Ui.CornerRadius="12"
+                                            Command="{Binding DataContext.StopCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Style="{StaticResource Glyph}" Text="&#xE71A;" FontSize="12" Margin="0,0,8,0" />
+                                            <TextBlock Text="Остановить" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="1" Style="{StaticResource GhostButton}" Margin="8,0,0,0" Content="Моды"
+                                            Padding="12,8" FontSize="12.5" c:Ui.CornerRadius="12" ToolTip="Моды, ресурспаки и шейдеры"
+                                            Command="{Binding DataContext.ModsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" />
+                                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Margin="8,0,0,0" Content="&#xE70F;"
+                                            ToolTip="Настройки профиля"
+                                            Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" />
+                                    <Button Grid.Column="3" Style="{StaticResource IconButton}" Margin="8,0,0,0" Content="&#xE8B7;"
+                                            ToolTip="Открыть папку"
+                                            Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Visibility="{Binding Catalog.IsEmpty, Converter={StaticResource BoolToVis}}">
+            <TextBlock Style="{StaticResource Glyph}" Text="&#xE8F1;" FontSize="44" Foreground="{DynamicResource MutedBrush}"
+                       HorizontalAlignment="Center" />
+            <TextBlock Text="Профилей пока нет" Style="{StaticResource SubHeading}" HorizontalAlignment="Center" Margin="0,14,0,4" />
+            <TextBlock Text="Нажмите «Новый профиль», выберите версию — лаунчер скачает всё нужное сам."
+                       Style="{StaticResource Muted}" TextAlignment="Center" />
+        </StackPanel>
+    </Grid>
+</UserControl>

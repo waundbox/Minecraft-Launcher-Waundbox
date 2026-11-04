@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- Интерфейс только для Windows (WPF); ядро остаётся кроссплатформенным. -->
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>Waundbox</AssemblyName>
+    <RootNamespace>Launcher.UI</RootNamespace>
+    <ApplicationIcon>Waundbox.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Product>Waundbox</Product>
+    <Company>Waundbox</Company>
+    <Description>Waundbox — лаунчер Minecraft</Description>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Быстрый старт: частичная предварительная компиляция + профильная оптимизация. -->
+    <TieredPGO>true</TieredPGO>
+    <!-- Мало памяти: без фоновой параллельной сборки мусора и с экономным режимом кучи. -->
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <ServerGarbageCollector>false</ServerGarbageCollector>
+    <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Для WPF-проектов SDK не подключает эти пространства имён сам. -->
+    <Using Include="System.IO" />
+    <Using Include="System.Net.Http" />
+    <Using Include="System.Threading" />
+  </ItemGroup>
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.GC.ConserveMemory" Value="5" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Waundbox.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Launcher.Core\Launcher.Core.csproj" />
+    <ProjectReference Include="..\Launcher.Infrastructure\Launcher.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

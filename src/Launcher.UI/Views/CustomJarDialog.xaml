@@ -1,0 +1,68 @@
+<UserControl x:Class="Launcher.UI.Views.CustomJarDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls"
+             xmlns:v="clr-namespace:Launcher.UI.Views">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,12,0">
+            <Grid Margin="0,0,0,6">
+                <TextBlock Text="Свой jar" Style="{StaticResource Heading}" VerticalAlignment="Center" />
+                <Button Style="{StaticResource IconButton}" Content="&#xE711;" ToolTip="Закрыть" HorizontalAlignment="Right"
+                        Command="{Binding CancelCommand}" />
+            </Grid>
+            <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap"
+                       Text="Установка собственной версии игры из файла .jar. Два способа: только jar (тогда укажите версию Minecraft, на которой он основан) или jar вместе с json версии (описание, которое часто идёт в комплекте с готовыми клиентами)." />
+
+            <TextBlock Text="Файл .jar" Style="{StaticResource Muted}" Margin="0,16,0,6" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Text="{Binding JarPath, Mode=OneWay}" IsReadOnly="True" />
+                <Button Grid.Column="1" Style="{StaticResource GhostButton}" Content="Выбрать…" Margin="8,0,0,0"
+                        Command="{Binding BrowseJarCommand}" />
+            </Grid>
+            <TextBlock Text="{Binding JarInfo}" Style="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0" />
+
+            <TextBlock Text="Файл json версии (необязательно)" Style="{StaticResource Muted}" Margin="0,14,0,6" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Text="{Binding JsonPath, Mode=OneWay}" IsReadOnly="True" />
+                <Button Grid.Column="1" Style="{StaticResource GhostButton}" Content="Выбрать…" Margin="8,0,0,0"
+                        Command="{Binding BrowseJsonCommand}" />
+                <Button Grid.Column="2" Style="{StaticResource IconButton}" Content="&#xE711;" ToolTip="Не использовать json" Margin="8,0,0,0"
+                        Command="{Binding ClearJsonCommand}" />
+            </Grid>
+
+            <TextBlock Text="Версия Minecraft, на которой основан jar" Style="{StaticResource Muted}" Margin="0,14,0,6" />
+            <TextBox Text="{Binding BaseVersion, UpdateSourceTrigger=PropertyChanged}" MaxLength="30" IsEnabled="{Binding IsNotBusy}" />
+            <TextBlock Style="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                       Text="Например, 1.21.1. Из неё берутся библиотеки, ресурсы и Java. Если рядом есть json с inheritsFrom, поле можно оставить пустым. Лаунчер скачает эту версию, если её ещё нет." />
+
+            <TextBlock Text="Название (профиля и версии, латиница, без пробелов)" Style="{StaticResource Muted}" Margin="0,14,0,6" />
+            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MaxLength="40" IsEnabled="{Binding IsNotBusy}" />
+
+            <v:IconPicker DataContext="{Binding Icons}" Margin="0,14,0,0" />
+            <v:MemoryPicker DataContext="{Binding Memory}" Margin="0,14,0,0"
+                            IsEnabled="{Binding DataContext.IsNotBusy, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+
+            <StackPanel Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Margin="0,14,0,0">
+                <ProgressBar Value="{Binding Progress, Mode=OneWay}" Maximum="100" />
+                <TextBlock Text="{Binding StatusText}" Style="{StaticResource Muted}" Margin="0,8,0,0" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding Error}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" Margin="0,12,0,0"
+                       Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Style="{StaticResource GhostButton}" Content="Отмена" Margin="0,0,10,0" Command="{Binding CancelCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Content="Установить" Command="{Binding InstallCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

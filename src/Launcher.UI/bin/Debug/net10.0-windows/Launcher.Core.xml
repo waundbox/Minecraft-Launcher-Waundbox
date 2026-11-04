@@ -1,0 +1,2299 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Launcher.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Launcher.Core.Assets.AssetObject">
+            <summary>Один игровой ресурс: имя в игре, SHA-1 (он же имя файла в хранилище) и размер.</summary>
+        </member>
+        <member name="M:Launcher.Core.Assets.AssetObject.#ctor(System.String,System.String,System.Int64)">
+            <summary>Один игровой ресурс: имя в игре, SHA-1 (он же имя файла в хранилище) и размер.</summary>
+        </member>
+        <member name="T:Launcher.Core.Assets.AssetIndex">
+            <summary>Индекс ресурсов целиком.</summary>
+            <param name="IsVirtual">Старый формат: ресурсы нужно разложить по именам в assets/virtual/{id}.</param>
+            <param name="MapToResources">Самый старый формат: ресурсы нужно разложить в папку resources игры.</param>
+        </member>
+        <member name="M:Launcher.Core.Assets.AssetIndex.#ctor(System.Collections.Generic.IReadOnlyList{Launcher.Core.Assets.AssetObject},System.Boolean,System.Boolean)">
+            <summary>Индекс ресурсов целиком.</summary>
+            <param name="IsVirtual">Старый формат: ресурсы нужно разложить по именам в assets/virtual/{id}.</param>
+            <param name="MapToResources">Самый старый формат: ресурсы нужно разложить в папку resources игры.</param>
+        </member>
+        <member name="P:Launcher.Core.Assets.AssetIndex.IsVirtual">
+            <summary>Старый формат: ресурсы нужно разложить по именам в assets/virtual/{id}.</summary>
+        </member>
+        <member name="P:Launcher.Core.Assets.AssetIndex.MapToResources">
+            <summary>Самый старый формат: ресурсы нужно разложить в папку resources игры.</summary>
+        </member>
+        <member name="T:Launcher.Core.Assets.AssetIndexParser">
+            <summary>Разбор индекса ресурсов (assets/indexes/*.json).</summary>
+        </member>
+        <member name="M:Launcher.Core.Assets.AssetIndexParser.Parse(System.String)">
+            <exception cref="T:Launcher.Core.Errors.VersionMetadataException">Индекс повреждён.</exception>
+        </member>
+        <member name="M:Launcher.Core.Assets.AssetIndexParser.ParseIndex(System.String)">
+            <exception cref="T:Launcher.Core.Errors.VersionMetadataException">Индекс повреждён.</exception>
+        </member>
+        <member name="T:Launcher.Core.Assets.LegacyAssetsPreparer">
+            <summary>
+            Старые версии Minecraft ищут ресурсы по именам (например sounds/random/click.ogg), а не по хешам.
+            Для них ресурсы копируются из хранилища assets/objects в assets/virtual/{id} или в папку resources игры.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Assets.LegacyAssetsPreparer.PrepareAsync(Launcher.Core.Installation.MinecraftLayout,System.String,Launcher.Core.Assets.AssetIndex,System.String,System.Threading.CancellationToken)">
+            <returns>Папка, в которую разложены ресурсы, или null, если индекс современный и раскладка не нужна.</returns>
+        </member>
+        <member name="T:Launcher.Core.Authentication.AccountChoice">
+            <summary>Правило выбора аккаунта для запуска. Чистая функция: сеть и диск не нужны.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.AccountChoice.Resolve(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Выбранный пользователем аккаунт, если он доступен; иначе первый доступный в порядке Microsoft, Ely.by, режим разработки.
+            Режим разработки доступен всегда.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.AccountService">
+            <summary>
+            Официальный вход: Microsoft (device code) → Xbox Live → XSTS → Minecraft Services → профиль.
+            Пароль пользователя лаунчер не видит: он вводится на странице Microsoft. Токены не попадают в журнал.
+            </summary>
+        </member>
+        <member name="F:Launcher.Core.Authentication.AccountService.RefreshMargin">
+            <summary>Токен Minecraft обновляется заранее, если до конца его действия осталось меньше этого времени.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.AccountService.LoginAsync(System.Action{Launcher.Core.Authentication.DeviceCodeInfo},System.Threading.CancellationToken)">
+            <summary>Входит в аккаунт. <paramref name="showCode"/> получает адрес и код, которые нужно показать пользователю.</summary>
+            <exception cref="T:Launcher.Core.Errors.AuthException">Вход не удался (причина в сообщении).</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.AccountService.GetAccountAsync(System.Threading.CancellationToken)">
+            <summary>Аккаунт для запуска игры: из хранилища, при необходимости с обновлением токенов. null — вход не выполнен.</summary>
+            <exception cref="T:Launcher.Core.Errors.AuthException">Нужен повторный вход или сервисы недоступны.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.AccountService.UploadSkinAsync(System.Byte[],System.Boolean,System.Threading.CancellationToken)">
+            <summary>Меняет скин аккаунта на серверах Mojang (его увидят и другие игроки).</summary>
+            <exception cref="T:Launcher.Core.Errors.AuthException">Вход не выполнен, токен отклонён или скин не принят.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.AccountService.GetSkinAsync(System.Threading.CancellationToken)">
+            <summary>Текущий скин аккаунта Microsoft: картинка и модель. null — вход не выполнен или скина нет.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.AccountService.RequireClientIdAsync(System.Threading.CancellationToken)">
+            <summary>Client id из настроек (если задан командой auth setup) важнее вшитого в лаунчер.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.DeviceCodeInfo">
+            <summary>Код для входа на другом устройстве/в браузере (device code flow).</summary>
+            <param name="DeviceCode">Секретный код устройства; показывать пользователю нельзя.</param>
+            <param name="UserCode">Короткий код, который пользователь вводит на странице входа.</param>
+            <param name="VerificationUri">Страница Microsoft, где вводится код.</param>
+        </member>
+        <member name="M:Launcher.Core.Authentication.DeviceCodeInfo.#ctor(System.String,System.String,System.Uri,System.Int32,System.Int32)">
+            <summary>Код для входа на другом устройстве/в браузере (device code flow).</summary>
+            <param name="DeviceCode">Секретный код устройства; показывать пользователю нельзя.</param>
+            <param name="UserCode">Короткий код, который пользователь вводит на странице входа.</param>
+            <param name="VerificationUri">Страница Microsoft, где вводится код.</param>
+        </member>
+        <member name="P:Launcher.Core.Authentication.DeviceCodeInfo.DeviceCode">
+            <summary>Секретный код устройства; показывать пользователю нельзя.</summary>
+        </member>
+        <member name="P:Launcher.Core.Authentication.DeviceCodeInfo.UserCode">
+            <summary>Короткий код, который пользователь вводит на странице входа.</summary>
+        </member>
+        <member name="P:Launcher.Core.Authentication.DeviceCodeInfo.VerificationUri">
+            <summary>Страница Microsoft, где вводится код.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.OAuthTokens">
+            <summary>Токены Microsoft. Хранить и логировать только через защищённое хранилище.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.OAuthTokens.#ctor(System.String,System.String,System.DateTimeOffset)">
+            <summary>Токены Microsoft. Хранить и логировать только через защищённое хранилище.</summary>
+        </member>
+        <member name="F:Launcher.Core.Authentication.DevicePollStatus.Pending">
+            <summary>Пользователь ещё не завершил вход.</summary>
+        </member>
+        <member name="F:Launcher.Core.Authentication.DevicePollStatus.SlowDown">
+            <summary>Сервер просит опрашивать реже.</summary>
+        </member>
+        <member name="F:Launcher.Core.Authentication.DevicePollStatus.Declined">
+            <summary>Пользователь отклонил вход.</summary>
+        </member>
+        <member name="F:Launcher.Core.Authentication.DevicePollStatus.Expired">
+            <summary>Время действия кода истекло.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.XboxToken">
+            <summary>Токен Xbox Live или XSTS вместе с «user hash» (uhs).</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.XboxToken.#ctor(System.String,System.String)">
+            <summary>Токен Xbox Live или XSTS вместе с «user hash» (uhs).</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.MinecraftSession">
+            <summary>Токен доступа к Minecraft Services.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.MinecraftSession.#ctor(System.String,System.DateTimeOffset)">
+            <summary>Токен доступа к Minecraft Services.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.MinecraftSkinInfo">
+            <summary>Текущий скин аккаунта на серверах Mojang: адрес картинки и модель (true — тонкие руки, Alex).</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.MinecraftSkinInfo.#ctor(System.Uri,System.Boolean)">
+            <summary>Текущий скин аккаунта на серверах Mojang: адрес картинки и модель (true — тонкие руки, Alex).</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.StoredAccount">
+            <summary>То, что лаунчер хранит между запусками. Хранится только в защищённом виде (см. <see cref="T:Launcher.Core.Authentication.IAccountStore"/>).</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.StoredAccount.#ctor(System.String,System.String,System.String,System.String,System.Nullable{System.DateTimeOffset})">
+            <summary>То, что лаунчер хранит между запусками. Хранится только в защищённом виде (см. <see cref="T:Launcher.Core.Authentication.IAccountStore"/>).</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.AccountStatus">
+            <summary>Состояние входа без секретов — для показа пользователю.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.AccountStatus.#ctor(System.Boolean,System.String,System.String,System.Boolean)">
+            <summary>Состояние входа без секретов — для показа пользователю.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.ElyAccountService">
+            <summary>
+            Вход через Ely.by. Пароль передаётся серверу один раз при входе и нигде не сохраняется;
+            на диске (в зашифрованном виде) остаются только токены. Токены не попадают в журнал.
+            </summary>
+        </member>
+        <member name="F:Launcher.Core.Authentication.ElyAccountService.AuthlibServer">
+            <summary>Значение для authlib-injector: короткое имя сервера Ely.by.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.ElyAccountService.LoginAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <param name="twoFactorCode">Код из приложения-аутентификатора, если аккаунт им защищён (иначе пусто).</param>
+            <exception cref="T:Launcher.Core.Authentication.ElyTwoFactorRequiredException">Нужен код.</exception>
+            <exception cref="T:Launcher.Core.Errors.AuthException">Неверные данные или сервис недоступен.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.ElyAccountService.GetGameAccountAsync(System.Threading.CancellationToken)">
+            <summary>
+            Аккаунт для запуска игры или null, если вход не выполнен. Токен проверяется и при необходимости обновляется.
+            Если сервер недоступен, используется сохранённый токен (игра покажет свою ошибку, если он устарел).
+            </summary>
+            <exception cref="T:Launcher.Core.Errors.AuthException">Сессия отозвана — нужен повторный вход.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.ElyAccountService.LogoutAsync(System.Threading.CancellationToken)">
+            <summary>Выход: токен отзывается на сервере (если получится), локальные данные удаляются в любом случае.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.ElyProfile">
+            <summary>Игрок Ely.by: идентификатор без дефисов и ник.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.ElyProfile.#ctor(System.String,System.String)">
+            <summary>Игрок Ely.by: идентификатор без дефисов и ник.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.ElySession">
+            <summary>Ответ сервера авторизации Ely.by на вход или обновление токена.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.ElySession.#ctor(System.String,System.String,Launcher.Core.Authentication.ElyProfile)">
+            <summary>Ответ сервера авторизации Ely.by на вход или обновление токена.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.StoredElyAccount">
+            <summary>Что лаунчер хранит между запусками (только в зашифрованном виде). Пароль не хранится никогда.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.StoredElyAccount.#ctor(System.String,System.String,System.String,System.String)">
+            <summary>Что лаунчер хранит между запусками (только в зашифрованном виде). Пароль не хранится никогда.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.ElyStatus">
+            <summary>Состояние входа без секретов — для показа пользователю.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.ElyStatus.#ctor(System.Boolean,System.String,System.String)">
+            <summary>Состояние входа без секретов — для показа пользователю.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.ElyTwoFactorRequiredException">
+            <summary>Аккаунт защищён двухфакторной аутентификацией: нужен код из приложения-аутентификатора.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.ElyTokenRejectedException">
+            <summary>Сервер Ely.by отклонил токен (он устарел или отозван): нужен вход заново.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.IElyAuthClient">
+            <summary>Сервер авторизации Ely.by (Yggdrasil-совместимый): https://docs.ely.by/en/minecraft-auth.html</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IElyAuthClient.AuthenticateAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <param name="usernameOrEmail">Ник или e-mail.</param>
+            <param name="passwordWithCode">Пароль; при двухфакторной защите — «пароль:код».</param>
+            <exception cref="T:Launcher.Core.Errors.AuthException">Неверные данные, нужен код (<see cref="T:Launcher.Core.Authentication.ElyTwoFactorRequiredException"/>) или сервис недоступен.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IElyAuthClient.RefreshAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <exception cref="T:Launcher.Core.Authentication.ElyTokenRejectedException">Токен не принят.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IElyAuthClient.ValidateAsync(System.String,System.Threading.CancellationToken)">
+            <summary>true — токен действителен. Сетевые сбои выбрасываются как исключение.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IElyAuthClient.InvalidateAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>Отзывает токен на сервере. Если токена уже нет, ошибкой это не считается.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.IElyAccountStore">
+            <summary>Защищённое хранилище входа Ely.by. Реализация обязана шифровать токены.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.IAuthlibInjectorProvider">
+            <summary>Где лежит authlib-injector: библиотека, которая подключает игру к стороннему серверу авторизации и скинов.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IAuthlibInjectorProvider.GetJarPathAsync(System.Threading.CancellationToken)">
+            <summary>Путь к jar-файлу (скачивает и проверяет контрольную сумму при необходимости).</summary>
+            <exception cref="T:Launcher.Core.Errors.AuthException">Файла нет и скачать его не удалось.</exception>
+        </member>
+        <member name="T:Launcher.Core.Authentication.GameAccount">
+            <summary>Данные игрока, которые передаются игре при запуске.</summary>
+            <param name="Uuid">UUID игрока без дефисов.</param>
+            <param name="UserType">"msa" для официальной авторизации Microsoft, "legacy" для development-режима.</param>
+            <param name="IsDevelopment">true — это НЕ официальная авторизация (см. <see cref="T:Launcher.Core.Authentication.DevelopmentAccount"/>).</param>
+            <param name="AuthlibServer">Для аккаунтов сторонних серверов авторизации (Ely.by): адрес, который передаётся в authlib-injector; иначе null.</param>
+        </member>
+        <member name="M:Launcher.Core.Authentication.GameAccount.#ctor(System.String,System.String,System.String,System.String,System.Boolean,System.String)">
+            <summary>Данные игрока, которые передаются игре при запуске.</summary>
+            <param name="Uuid">UUID игрока без дефисов.</param>
+            <param name="UserType">"msa" для официальной авторизации Microsoft, "legacy" для development-режима.</param>
+            <param name="IsDevelopment">true — это НЕ официальная авторизация (см. <see cref="T:Launcher.Core.Authentication.DevelopmentAccount"/>).</param>
+            <param name="AuthlibServer">Для аккаунтов сторонних серверов авторизации (Ely.by): адрес, который передаётся в authlib-injector; иначе null.</param>
+        </member>
+        <member name="P:Launcher.Core.Authentication.GameAccount.Uuid">
+            <summary>UUID игрока без дефисов.</summary>
+        </member>
+        <member name="P:Launcher.Core.Authentication.GameAccount.UserType">
+            <summary>"msa" для официальной авторизации Microsoft, "legacy" для development-режима.</summary>
+        </member>
+        <member name="P:Launcher.Core.Authentication.GameAccount.IsDevelopment">
+            <summary>true — это НЕ официальная авторизация (см. <see cref="T:Launcher.Core.Authentication.DevelopmentAccount"/>).</summary>
+        </member>
+        <member name="P:Launcher.Core.Authentication.GameAccount.AuthlibServer">
+            <summary>Для аккаунтов сторонних серверов авторизации (Ely.by): адрес, который передаётся в authlib-injector; иначе null.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.DevelopmentAccount">
+            <summary>
+            DEVELOPMENT-аккаунт для проверки механики запуска без входа в Microsoft.
+            Это не официальная авторизация и не подтверждает владение игрой: у такого игрока нет настоящего токена,
+            он не сможет зайти на серверы с проверкой лицензии. Официальная авторизация (Microsoft/Xbox/Minecraft) будет
+            добавлена отдельным этапом в модуле Authentication.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.DevelopmentAccount.Create(System.String)">
+            <exception cref="T:Launcher.Core.Errors.LauncherException">Недопустимый ник.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.DevelopmentAccount.OfflineUuid(System.String)">
+            <summary>Тот же алгоритм, что у Java UUID.nameUUIDFromBytes("OfflinePlayer:" + ник): стабильный UUID для одного и того же ника.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.IMicrosoftOAuthClient">
+            <summary>Вход Microsoft по протоколу OAuth 2.0 device code flow (без паролей в лаунчере и без client secret).</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IMicrosoftOAuthClient.RequestDeviceCodeAsync(System.String,System.Threading.CancellationToken)">
+            <exception cref="T:Launcher.Core.Errors.AuthException">Сервис недоступен или отклонил запрос.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IMicrosoftOAuthClient.PollAsync(System.String,Launcher.Core.Authentication.DeviceCodeInfo,System.Threading.CancellationToken)">
+            <summary>Один опрос: завершил ли пользователь вход.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IMicrosoftOAuthClient.RefreshAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <exception cref="T:Launcher.Core.Errors.AuthException">Токен обновления недействителен — нужен повторный вход.</exception>
+        </member>
+        <member name="T:Launcher.Core.Authentication.IXboxClient">
+            <summary>Xbox Live и XSTS.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.IMinecraftServicesClient">
+            <summary>Minecraft Services (api.minecraftservices.com).</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IMinecraftServicesClient.GetProfileAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Профиль игрока; null — у аккаунта нет Minecraft: Java Edition.</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IMinecraftServicesClient.GetSkinAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Активный скин аккаунта; null — своего скина нет (используется стандартный).</summary>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IMinecraftServicesClient.UploadSkinAsync(System.String,System.Byte[],System.Boolean,System.Threading.CancellationToken)">
+            <summary>Загружает PNG скина на серверы Mojang (POST /minecraft/profile/skins, multipart: variant + file).</summary>
+            <exception cref="T:Launcher.Core.Errors.AuthException">Токен отклонён, скин не принят или сервис недоступен.</exception>
+        </member>
+        <member name="M:Launcher.Core.Authentication.IMinecraftServicesClient.DownloadSkinAsync(System.Uri,System.Threading.CancellationToken)">
+            <summary>Скачивает PNG скина (только https textures.minecraft.net, не больше 1 МБ).</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.IAccountStore">
+            <summary>Защищённое хранилище входа. Реализация обязана шифровать токены.</summary>
+        </member>
+        <member name="T:Launcher.Core.Authentication.LauncherAppRegistration">
+            <summary>
+            Приложение Microsoft (Azure), от имени которого лаунчер входит в аккаунты игроков.
+            Регистрируется ОДИН раз автором лаунчера; игрокам ничего регистрировать не нужно — они только вводят код на странице Microsoft.
+            Client id — не секрет (так же вшит в другие лаунчеры). Секретов (client secret) у публичного приложения нет.
+            Вписывайте сюда только идентификатор СВОЕГО приложения, одобренного для Minecraft API; чужие идентификаторы использовать нельзя.
+            </summary>
+        </member>
+        <member name="F:Launcher.Core.Authentication.LauncherAppRegistration.ClientId">
+            <summary>Application (client) ID вида xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx. Приложение «Waundbox» зарегистрировано в Azure; одобрение для Minecraft API нужно получить отдельно.</summary>
+        </member>
+        <member name="T:Launcher.Core.Configuration.ElementLayout">
+            <summary>
+            Настройки одного элемента главной страницы в редакторе интерфейса (положение, размер, прозрачность).
+            Функция элемента (что делает кнопка) не настраивается — только внешний вид.
+            </summary>
+            <param name="X">Сдвиг по горизонтали, пикселей.</param>
+            <param name="Y">Сдвиг по вертикали, пикселей.</param>
+            <param name="Scale">Масштаб (1 — как есть).</param>
+            <param name="Opacity">Прозрачность от 0 до 1.</param>
+            <param name="Visible">Показывать элемент.</param>
+            <param name="Corner">Скругление углов, пикселей; null — как задано по умолчанию.</param>
+            <param name="Z">Слой: у кого число больше, тот рисуется поверх (−50…50).</param>
+        </member>
+        <member name="M:Launcher.Core.Configuration.ElementLayout.#ctor(System.Double,System.Double,System.Double,System.Double,System.Boolean,System.Nullable{System.Double},System.Int32)">
+            <summary>
+            Настройки одного элемента главной страницы в редакторе интерфейса (положение, размер, прозрачность).
+            Функция элемента (что делает кнопка) не настраивается — только внешний вид.
+            </summary>
+            <param name="X">Сдвиг по горизонтали, пикселей.</param>
+            <param name="Y">Сдвиг по вертикали, пикселей.</param>
+            <param name="Scale">Масштаб (1 — как есть).</param>
+            <param name="Opacity">Прозрачность от 0 до 1.</param>
+            <param name="Visible">Показывать элемент.</param>
+            <param name="Corner">Скругление углов, пикселей; null — как задано по умолчанию.</param>
+            <param name="Z">Слой: у кого число больше, тот рисуется поверх (−50…50).</param>
+        </member>
+        <member name="P:Launcher.Core.Configuration.ElementLayout.X">
+            <summary>Сдвиг по горизонтали, пикселей.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.ElementLayout.Y">
+            <summary>Сдвиг по вертикали, пикселей.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.ElementLayout.Scale">
+            <summary>Масштаб (1 — как есть).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.ElementLayout.Opacity">
+            <summary>Прозрачность от 0 до 1.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.ElementLayout.Visible">
+            <summary>Показывать элемент.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.ElementLayout.Corner">
+            <summary>Скругление углов, пикселей; null — как задано по умолчанию.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.ElementLayout.Z">
+            <summary>Слой: у кого число больше, тот рисуется поверх (−50…50).</summary>
+        </member>
+        <member name="M:Launcher.Core.Configuration.ElementLayout.Clamped">
+            <summary>Значения, приведённые к допустимым пределам (защита от испорченного файла настроек).</summary>
+        </member>
+        <member name="T:Launcher.Core.Configuration.HomeLayout">
+            <summary>Чтение и запись раскладки главной страницы (хранится в настройках одной JSON-строкой).</summary>
+        </member>
+        <member name="M:Launcher.Core.Configuration.HomeLayout.Parse(System.String)">
+            <summary>Разбирает строку из настроек; испорченная строка даёт пустую раскладку.</summary>
+        </member>
+        <member name="M:Launcher.Core.Configuration.HomeLayout.Serialize(System.Collections.Generic.IReadOnlyDictionary{System.String,Launcher.Core.Configuration.ElementLayout})">
+            <summary>Строка для настроек: элементы с обычными значениями не записываются; пустая раскладка — null.</summary>
+        </member>
+        <member name="T:Launcher.Core.Configuration.LauncherSettings">
+            <summary>Пользовательские настройки лаунчера (хранятся вне исходного кода, в файле).</summary>
+            <param name="JavaPath">Путь к java, заданный пользователем; null — искать автоматически.</param>
+            <param name="MicrosoftClientId">Идентификатор приложения Azure (client id), зарегистрированного пользователем для входа в Microsoft; не секрет.</param>
+            <param name="EcoMode">Экономный режим интерфейса: без фоновых анимаций и сложных эффектов.</param>
+            <param name="DevUsername">Ник для development-режима (когда вход в Microsoft не выполнен).</param>
+            <param name="LastProfile">Последний выбранный профиль.</param>
+            <param name="AnimationFps">Устарело: частота анимаций теперь всегда 120 кадров/с, значение игнорируется (поле оставлено для совместимости со старыми файлами настроек).</param>
+            <param name="Theme">"dark" или "light"; null — тёмная.</param>
+            <param name="AccentColor">Основной цвет интерфейса в виде #RRGGBB; null — стандартный для темы.</param>
+            <param name="BackgroundColor">Цвет фона в виде #RRGGBB; null — стандартный для темы.</param>
+            <param name="PreferredAccount">Какой аккаунт использовать для запуска: "microsoft", "elyby" или "dev"; null — первый доступный (Microsoft, затем Ely.by, затем режим разработки).</param>
+            <param name="CurseForgeApiKey">Бесплатный ключ API CurseForge (console.curseforge.com) для импорта сборок CurseForge; хранится в settings.json открытым текстом.</param>
+            <param name="SkinSlim">Модель скина: false — Steve (руки 4 пикселя), true — Alex (тонкие руки, 3 пикселя). Используется для показа и при смене скина Microsoft.</param>
+            <param name="ModelPose">Поза стандартной модели на главной (id из <c>PlayerPoses</c>); null — «Стоит».</param>
+            <param name="ModelOverlay">Показывать второй слой скина (шапка, куртка, рукава, штаны) на стандартной модели.</param>
+            <param name="ModelUseSkin">Накладывать выбранный скин на свою модель Blockbench вместо текстуры из файла (модели из шаблона лаунчера делают так всегда).</param>
+            <param name="ShowModel3D">Показывать 3D-персонажа на главной; если выключено, панель запуска встаёт по центру.</param>
+            <param name="ModelSpin">Вращать 3D-персонажа на главной автоматически.</param>
+            <param name="DeveloperMode">Открыта вкладка разработчика (10 нажатий на плашку версии в настройках).</param>
+            <param name="IconSize">Разрешение значков профилей в пикселях (по умолчанию 32; меняется во вкладке разработчика).</param>
+            <param name="ShowFps">Счётчик кадров в углу окна (вкладка разработчика).</param>
+            <param name="TabOrder">Порядок вкладок навигации: id через запятую; null — стандартный.</param>
+            <param name="HiddenTabs">Скрытые вкладки: id через запятую.</param>
+            <param name="HiddenHomeParts">Скрытые части главной: id через запятую.</param>
+            <param name="HomeLayout">Раскладка главной страницы из редактора интерфейса (JSON, см. <see cref="T:Launcher.Core.Configuration.HomeLayout"/>); null — стандартная.</param>
+            <param name="BackgroundGlow">Показывать фоновое свечение («дым»).</param>
+            <param name="MaxGraphics">Максимальная графика (режим разработчика): 3D-модель всегда рисуется в полном размере окна.</param>
+            <param name="IdleEco">Через 10 секунд без действий в окне лаунчера переходить в экономный режим.</param>
+            <param name="CustomModelPath">Путь к .bbmodel из Blockbench, который показывается на главной вместо стандартной модели; null — стандартная.</param>
+        </member>
+        <member name="M:Launcher.Core.Configuration.LauncherSettings.#ctor(System.String,System.String,System.Boolean,System.String,System.String,System.Int32,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Int32,System.Boolean,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>Пользовательские настройки лаунчера (хранятся вне исходного кода, в файле).</summary>
+            <param name="JavaPath">Путь к java, заданный пользователем; null — искать автоматически.</param>
+            <param name="MicrosoftClientId">Идентификатор приложения Azure (client id), зарегистрированного пользователем для входа в Microsoft; не секрет.</param>
+            <param name="EcoMode">Экономный режим интерфейса: без фоновых анимаций и сложных эффектов.</param>
+            <param name="DevUsername">Ник для development-режима (когда вход в Microsoft не выполнен).</param>
+            <param name="LastProfile">Последний выбранный профиль.</param>
+            <param name="AnimationFps">Устарело: частота анимаций теперь всегда 120 кадров/с, значение игнорируется (поле оставлено для совместимости со старыми файлами настроек).</param>
+            <param name="Theme">"dark" или "light"; null — тёмная.</param>
+            <param name="AccentColor">Основной цвет интерфейса в виде #RRGGBB; null — стандартный для темы.</param>
+            <param name="BackgroundColor">Цвет фона в виде #RRGGBB; null — стандартный для темы.</param>
+            <param name="PreferredAccount">Какой аккаунт использовать для запуска: "microsoft", "elyby" или "dev"; null — первый доступный (Microsoft, затем Ely.by, затем режим разработки).</param>
+            <param name="CurseForgeApiKey">Бесплатный ключ API CurseForge (console.curseforge.com) для импорта сборок CurseForge; хранится в settings.json открытым текстом.</param>
+            <param name="SkinSlim">Модель скина: false — Steve (руки 4 пикселя), true — Alex (тонкие руки, 3 пикселя). Используется для показа и при смене скина Microsoft.</param>
+            <param name="ModelPose">Поза стандартной модели на главной (id из <c>PlayerPoses</c>); null — «Стоит».</param>
+            <param name="ModelOverlay">Показывать второй слой скина (шапка, куртка, рукава, штаны) на стандартной модели.</param>
+            <param name="ModelUseSkin">Накладывать выбранный скин на свою модель Blockbench вместо текстуры из файла (модели из шаблона лаунчера делают так всегда).</param>
+            <param name="ShowModel3D">Показывать 3D-персонажа на главной; если выключено, панель запуска встаёт по центру.</param>
+            <param name="ModelSpin">Вращать 3D-персонажа на главной автоматически.</param>
+            <param name="DeveloperMode">Открыта вкладка разработчика (10 нажатий на плашку версии в настройках).</param>
+            <param name="IconSize">Разрешение значков профилей в пикселях (по умолчанию 32; меняется во вкладке разработчика).</param>
+            <param name="ShowFps">Счётчик кадров в углу окна (вкладка разработчика).</param>
+            <param name="TabOrder">Порядок вкладок навигации: id через запятую; null — стандартный.</param>
+            <param name="HiddenTabs">Скрытые вкладки: id через запятую.</param>
+            <param name="HiddenHomeParts">Скрытые части главной: id через запятую.</param>
+            <param name="HomeLayout">Раскладка главной страницы из редактора интерфейса (JSON, см. <see cref="T:Launcher.Core.Configuration.HomeLayout"/>); null — стандартная.</param>
+            <param name="BackgroundGlow">Показывать фоновое свечение («дым»).</param>
+            <param name="MaxGraphics">Максимальная графика (режим разработчика): 3D-модель всегда рисуется в полном размере окна.</param>
+            <param name="IdleEco">Через 10 секунд без действий в окне лаунчера переходить в экономный режим.</param>
+            <param name="CustomModelPath">Путь к .bbmodel из Blockbench, который показывается на главной вместо стандартной модели; null — стандартная.</param>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.JavaPath">
+            <summary>Путь к java, заданный пользователем; null — искать автоматически.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.MicrosoftClientId">
+            <summary>Идентификатор приложения Azure (client id), зарегистрированного пользователем для входа в Microsoft; не секрет.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.EcoMode">
+            <summary>Экономный режим интерфейса: без фоновых анимаций и сложных эффектов.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.DevUsername">
+            <summary>Ник для development-режима (когда вход в Microsoft не выполнен).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.LastProfile">
+            <summary>Последний выбранный профиль.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.AnimationFps">
+            <summary>Устарело: частота анимаций теперь всегда 120 кадров/с, значение игнорируется (поле оставлено для совместимости со старыми файлами настроек).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.PreferredAccount">
+            <summary>Какой аккаунт использовать для запуска: "microsoft", "elyby" или "dev"; null — первый доступный (Microsoft, затем Ely.by, затем режим разработки).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.Theme">
+            <summary>"dark" или "light"; null — тёмная.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.AccentColor">
+            <summary>Основной цвет интерфейса в виде #RRGGBB; null — стандартный для темы.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.BackgroundColor">
+            <summary>Цвет фона в виде #RRGGBB; null — стандартный для темы.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.CurseForgeApiKey">
+            <summary>Бесплатный ключ API CurseForge (console.curseforge.com) для импорта сборок CurseForge; хранится в settings.json открытым текстом.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.SkinSlim">
+            <summary>Модель скина: false — Steve (руки 4 пикселя), true — Alex (тонкие руки, 3 пикселя). Используется для показа и при смене скина Microsoft.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.CustomModelPath">
+            <summary>Путь к .bbmodel из Blockbench, который показывается на главной вместо стандартной модели; null — стандартная.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.ModelPose">
+            <summary>Поза стандартной модели на главной (id из <c>PlayerPoses</c>); null — «Стоит».</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.ModelOverlay">
+            <summary>Показывать второй слой скина (шапка, куртка, рукава, штаны) на стандартной модели.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.ModelUseSkin">
+            <summary>Накладывать выбранный скин на свою модель Blockbench вместо текстуры из файла (модели из шаблона лаунчера делают так всегда).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.ShowModel3D">
+            <summary>Показывать 3D-персонажа на главной; если выключено, панель запуска встаёт по центру.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.ModelSpin">
+            <summary>Вращать 3D-персонажа на главной автоматически.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.DeveloperMode">
+            <summary>Открыта вкладка разработчика (10 нажатий на плашку версии в настройках).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.IconSize">
+            <summary>Разрешение значков профилей в пикселях (по умолчанию 32; меняется во вкладке разработчика).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.ShowFps">
+            <summary>Счётчик кадров в углу окна (вкладка разработчика).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.TabOrder">
+            <summary>Порядок вкладок навигации: id через запятую; null — стандартный.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.HiddenTabs">
+            <summary>Скрытые вкладки: id через запятую.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.HiddenHomeParts">
+            <summary>Скрытые части главной: id через запятую.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.HomeLayout">
+            <summary>Раскладка главной страницы из редактора интерфейса (JSON, см. <see cref="T:Launcher.Core.Configuration.HomeLayout"/>); null — стандартная.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.BackgroundGlow">
+            <summary>Показывать фоновое свечение («дым»).</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.MaxGraphics">
+            <summary>Максимальная графика (режим разработчика): 3D-модель всегда рисуется в полном размере окна.</summary>
+        </member>
+        <member name="P:Launcher.Core.Configuration.LauncherSettings.IdleEco">
+            <summary>Через 10 секунд без действий в окне лаунчера переходить в экономный режим.</summary>
+        </member>
+        <member name="T:Launcher.Core.Configuration.ISettingsStore">
+            <summary>Хранилище настроек.</summary>
+        </member>
+        <member name="M:Launcher.Core.Configuration.ISettingsStore.LoadAsync(System.Threading.CancellationToken)">
+            <summary>Загружает настройки; если файла нет или он повреждён — возвращает настройки по умолчанию.</summary>
+        </member>
+        <member name="T:Launcher.Core.Configuration.ThemeColors">
+            <summary>Проверка записи цвета из настроек. Лежит в ядре, чтобы проверяться тестами без интерфейса.</summary>
+        </member>
+        <member name="M:Launcher.Core.Configuration.ThemeColors.TryNormalizeHex(System.String)">
+            <summary>Приводит «#RRGGBB», «RRGGBB» или «#rgb» к виду «#RRGGBB» (заглавные буквы); null, если запись некорректна.</summary>
+        </member>
+        <member name="T:Launcher.Core.Custom.JarInspection">
+            <summary>Результат проверки jar-файла.</summary>
+            <param name="DetectedVersion">Версия игры из version.json внутри jar (есть в современных клиентах) или null.</param>
+            <param name="LooksLikeClient">Внутри есть класс запуска клиента Minecraft.</param>
+        </member>
+        <member name="M:Launcher.Core.Custom.JarInspection.#ctor(System.Int32,System.Boolean,System.String,System.Boolean)">
+            <summary>Результат проверки jar-файла.</summary>
+            <param name="DetectedVersion">Версия игры из version.json внутри jar (есть в современных клиентах) или null.</param>
+            <param name="LooksLikeClient">Внутри есть класс запуска клиента Minecraft.</param>
+        </member>
+        <member name="P:Launcher.Core.Custom.JarInspection.LooksLikeClient">
+            <summary>Внутри есть класс запуска клиента Minecraft.</summary>
+        </member>
+        <member name="P:Launcher.Core.Custom.JarInspection.DetectedVersion">
+            <summary>Версия игры из version.json внутри jar (есть в современных клиентах) или null.</summary>
+        </member>
+        <member name="T:Launcher.Core.Custom.CustomJarRequest">
+            <param name="JarPath">Путь к jar.</param>
+            <param name="Name">Имя версии (латиница, цифры, точка, дефис, подчёркивание).</param>
+            <param name="BaseVersion">Версия Minecraft, на которой основан jar (нужна без своего json; с json берётся из него, если не указана).</param>
+            <param name="VersionJsonPath">Готовый json версии рядом с jar или null.</param>
+        </member>
+        <member name="M:Launcher.Core.Custom.CustomJarRequest.#ctor(System.String,System.String,System.String,System.String)">
+            <param name="JarPath">Путь к jar.</param>
+            <param name="Name">Имя версии (латиница, цифры, точка, дефис, подчёркивание).</param>
+            <param name="BaseVersion">Версия Minecraft, на которой основан jar (нужна без своего json; с json берётся из него, если не указана).</param>
+            <param name="VersionJsonPath">Готовый json версии рядом с jar или null.</param>
+        </member>
+        <member name="P:Launcher.Core.Custom.CustomJarRequest.JarPath">
+            <summary>Путь к jar.</summary>
+        </member>
+        <member name="P:Launcher.Core.Custom.CustomJarRequest.Name">
+            <summary>Имя версии (латиница, цифры, точка, дефис, подчёркивание).</summary>
+        </member>
+        <member name="P:Launcher.Core.Custom.CustomJarRequest.BaseVersion">
+            <summary>Версия Minecraft, на которой основан jar (нужна без своего json; с json берётся из него, если не указана).</summary>
+        </member>
+        <member name="P:Launcher.Core.Custom.CustomJarRequest.VersionJsonPath">
+            <summary>Готовый json версии рядом с jar или null.</summary>
+        </member>
+        <member name="T:Launcher.Core.Custom.CustomJarTools">
+            <summary>Проверка jar и сборка идентификатора/описания своей версии. Всё, что не требует сети, вынесено сюда, чтобы тестироваться отдельно.</summary>
+        </member>
+        <member name="M:Launcher.Core.Custom.CustomJarTools.MakeVersionId(System.String,System.String)">
+            <summary>Идентификатор версии: «имя+mc1.21.1».</summary>
+        </member>
+        <member name="M:Launcher.Core.Custom.CustomJarTools.Inspect(System.String,System.String)">
+            <exception cref="T:Launcher.Core.Errors.CustomJarException">Файл не найден или это не jar/zip или в нём нет классов.</exception>
+        </member>
+        <member name="M:Launcher.Core.Custom.CustomJarTools.BuildOverlayJson(System.String,System.String,System.String)">
+            <summary>Описание своей версии без собственного json: наследуется от базовой, в classpath идёт ваш jar.</summary>
+        </member>
+        <member name="M:Launcher.Core.Custom.CustomJarTools.NormalizeUserJson(System.String,System.String,System.String,System.String@,System.String@)">
+            <summary>
+            Приводит json пользователя к виду, который понимает лаунчер: ставит наш идентификатор, при наследовании
+            отмечает «свой jar» и добавляет недостающие поля; у самостоятельной версии подменяет данные клиента (jar другой).
+            </summary>
+            <param name="baseMainClass">Главный класс базовой версии — на случай, если в json его нет.</param>
+        </member>
+        <member name="M:Launcher.Core.Custom.CustomJarTools.ReadMainClass(System.String)">
+            <summary>Читает mainClass у уже установленной версии (чтобы наследовать запуск).</summary>
+        </member>
+        <member name="T:Launcher.Core.Custom.CustomJarInstaller">
+            <summary>
+            Установка собственного jar как версии игры. Два случая: (1) только jar + базовая версия Minecraft;
+            (2) jar + готовый json версии (с наследованием от базовой или самостоятельный).
+            Версия записывается последней; при ошибке созданная папка версии удаляется.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Downloads.BatchProgress">
+            <summary>Общий прогресс пакета загрузок.</summary>
+        </member>
+        <member name="M:Launcher.Core.Downloads.BatchProgress.#ctor(System.Int32,System.Int32,System.Int64,System.Int64)">
+            <summary>Общий прогресс пакета загрузок.</summary>
+        </member>
+        <member name="T:Launcher.Core.Downloads.BatchResult">
+            <summary>Итог пакета загрузок.</summary>
+        </member>
+        <member name="M:Launcher.Core.Downloads.BatchResult.#ctor(System.Int32,System.Int32,System.Int64)">
+            <summary>Итог пакета загрузок.</summary>
+        </member>
+        <member name="T:Launcher.Core.Downloads.DownloadBatchRunner">
+            <summary>Скачивает много файлов параллельно с ограничением числа одновременных загрузок.</summary>
+        </member>
+        <member name="M:Launcher.Core.Downloads.DownloadBatchRunner.RunAsync(System.Collections.Generic.IReadOnlyList{Launcher.Core.Downloads.DownloadRequest},System.IProgress{Launcher.Core.Downloads.BatchProgress},System.Threading.CancellationToken)">
+            <summary>
+            Первая же ошибка отменяет остальные загрузки и пробрасывается наружу.
+            Отмена через <paramref name="ct"/> вызывает OperationCanceledException.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Downloads.DownloadRequest">
+            <summary>Что и куда скачать. Контрольная сумма и размер берутся из метаданных, если они там есть.</summary>
+            <param name="Url">Адрес источника (из метаданных, не угадывается).</param>
+            <param name="DestinationPath">Полный путь итогового файла.</param>
+            <param name="Sha1">Ожидаемый SHA-1 (hex) или null.</param>
+            <param name="Size">Ожидаемый размер в байтах или null.</param>
+        </member>
+        <member name="M:Launcher.Core.Downloads.DownloadRequest.#ctor(System.Uri,System.String,System.String,System.Nullable{System.Int64})">
+            <summary>Что и куда скачать. Контрольная сумма и размер берутся из метаданных, если они там есть.</summary>
+            <param name="Url">Адрес источника (из метаданных, не угадывается).</param>
+            <param name="DestinationPath">Полный путь итогового файла.</param>
+            <param name="Sha1">Ожидаемый SHA-1 (hex) или null.</param>
+            <param name="Size">Ожидаемый размер в байтах или null.</param>
+        </member>
+        <member name="P:Launcher.Core.Downloads.DownloadRequest.Url">
+            <summary>Адрес источника (из метаданных, не угадывается).</summary>
+        </member>
+        <member name="P:Launcher.Core.Downloads.DownloadRequest.DestinationPath">
+            <summary>Полный путь итогового файла.</summary>
+        </member>
+        <member name="P:Launcher.Core.Downloads.DownloadRequest.Sha1">
+            <summary>Ожидаемый SHA-1 (hex) или null.</summary>
+        </member>
+        <member name="P:Launcher.Core.Downloads.DownloadRequest.Size">
+            <summary>Ожидаемый размер в байтах или null.</summary>
+        </member>
+        <member name="T:Launcher.Core.Downloads.DownloadOutcome">
+            <summary>Что произошло с файлом.</summary>
+        </member>
+        <member name="F:Launcher.Core.Downloads.DownloadOutcome.Downloaded">
+            <summary>Файл скачан и проверен.</summary>
+        </member>
+        <member name="F:Launcher.Core.Downloads.DownloadOutcome.AlreadyValid">
+            <summary>Файл уже был на диске и прошёл проверку — скачивание не потребовалось.</summary>
+        </member>
+        <member name="T:Launcher.Core.Downloads.IFileDownloader">
+            <summary>Скачивает один файл с проверкой целостности.</summary>
+        </member>
+        <member name="M:Launcher.Core.Downloads.IFileDownloader.DownloadAsync(Launcher.Core.Downloads.DownloadRequest,System.IProgress{System.Int64},System.Threading.CancellationToken)">
+            <param name="bytesProgress">Получает приращения скачанных байт (при повторе попытки приращение может быть отрицательным).</param>
+        </member>
+        <member name="T:Launcher.Core.Downloads.FileIntegrity">
+            <summary>Проверка файлов по размеру и SHA-1.</summary>
+        </member>
+        <member name="M:Launcher.Core.Downloads.FileIntegrity.IsKnownGoodAsync(System.String,System.String,System.Nullable{System.Int64},System.Threading.CancellationToken)">
+            <summary>
+            true, если файл существует и совпадает со ВСЕМИ указанными ожиданиями.
+            Если не указано ни размера, ни суммы — проверять нечем, поэтому файл НЕ считается исправным.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Downloads.FileIntegrity.MatchesAsync(System.String,System.String,System.Nullable{System.Int64},System.Threading.CancellationToken)">
+            <summary>true, если файл существует и совпадает с теми ожиданиями, которые указаны (если не указаны — true).</summary>
+        </member>
+        <member name="M:Launcher.Core.Downloads.FileIntegrity.ComputeSha1Async(System.String,System.Threading.CancellationToken)">
+            <summary>SHA-1 файла в нижнем регистре (hex).</summary>
+        </member>
+        <member name="T:Launcher.Core.Downloads.InlineProgress`1">
+            <summary>
+            IProgress, который вызывает обработчик сразу в том же потоке
+            (стандартный Progress&lt;T&gt; переносит вызов в другой поток и может нарушать порядок).
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.LauncherException">
+            <summary>Базовое исключение лаунчера. Сообщение пригодно для показа пользователю.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.ManifestFormatException">
+            <summary>Метаданные пришли, но их формат не соответствует ожидаемому.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.ManifestUnavailableException">
+            <summary>Манифест версий недоступен: нет сети/сервер недоступен и нет локальной копии.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.DownloadException">
+            <summary>Файл не удалось скачать (сервер ответил ошибкой, сеть оборвалась и т.п.).</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.IntegrityException">
+            <summary>Скачанный файл не совпал с контрольной суммой или размером из метаданных.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.InsufficientDiskSpaceException">
+            <summary>Недостаточно места на диске.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.VersionMetadataException">
+            <summary>JSON версии или индекс ресурсов имеет неожиданный формат.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.VersionNotFoundException">
+            <summary>Запрошенной версии нет в официальном списке.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.JavaNotFoundException">
+            <summary>Подходящая Java не найдена или указанная Java не работает.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.LaunchException">
+            <summary>Игру не удалось подготовить или запустить.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.ProfileException">
+            <summary>Ошибка в данных профиля или в хранилище профилей.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.QuiltException">
+            <summary>Сервис Quilt недоступен, вернул неожиданные данные или не поддерживает версию.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.FabricException">
+            <summary>Сервис Fabric недоступен, вернул неожиданные данные или не поддерживает версию.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.ForgeException">
+            <summary>Установка Forge не удалась: сервис недоступен, формат не поддерживается или установщик завершился с ошибкой.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.NeoForgeException">
+            <summary>Установка NeoForge не удалась: сервис недоступен, версия не поддерживается или установщик завершился с ошибкой.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.AuthException">
+            <summary>Вход в аккаунт Microsoft/Xbox/Minecraft не удался. Сообщение понятно пользователю и не содержит токенов.</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.ModException">
+            <summary>Ошибка при работе с модами, ресурспаками и шейдерами (поиск, установка, удаление).</summary>
+        </member>
+        <member name="T:Launcher.Core.Errors.CustomJarException">
+            <summary>Ошибка установки собственного jar-файла.</summary>
+        </member>
+        <member name="T:Launcher.Core.Fabric.FabricInstaller">
+            <summary>
+            Установка Fabric: базовая версия Minecraft → профиль запуска Fabric с официального сервиса → библиотеки загрузчика.
+            Профиль записывается последним: если загрузка оборвалась, «наполовину установленной» версии не появляется.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Fabric.FabricInstaller.InstallAsync(System.String,System.String,Launcher.Core.Installation.InstallOptions,System.IProgress{Launcher.Core.Installation.InstallProgress},System.Threading.CancellationToken)">
+            <param name="loaderVersion">Версия загрузчика или null — последняя стабильная.</param>
+        </member>
+        <member name="T:Launcher.Core.Fabric.FabricLoaderVersion">
+            <summary>Версия загрузчика Fabric Loader из официального сервиса meta.fabricmc.net.</summary>
+        </member>
+        <member name="M:Launcher.Core.Fabric.FabricLoaderVersion.#ctor(System.String,System.Boolean)">
+            <summary>Версия загрузчика Fabric Loader из официального сервиса meta.fabricmc.net.</summary>
+        </member>
+        <member name="T:Launcher.Core.Fabric.IFabricMetaClient">
+            <summary>Доступ к официальному сервису метаданных Fabric (https://meta.fabricmc.net).</summary>
+        </member>
+        <member name="M:Launcher.Core.Fabric.IFabricMetaClient.GetLoaderVersionsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Версии загрузчика для версии игры, от новых к старым (порядок сервиса). Пустой список — версия игры не поддерживается.</summary>
+            <exception cref="T:Launcher.Core.Errors.FabricException">Сервис недоступен или ответил неожиданно.</exception>
+        </member>
+        <member name="M:Launcher.Core.Fabric.IFabricMetaClient.GetProfileJsonAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>JSON профиля запуска (то, что кладётся в versions/{id}/{id}.json).</summary>
+            <exception cref="T:Launcher.Core.Errors.FabricException">Сервис недоступен или ответил неожиданно.</exception>
+        </member>
+        <member name="T:Launcher.Core.Fabric.FabricMetaParser">
+            <summary>Разбор списка версий загрузчика: [ { "loader": { "version": "0.19.5", "stable": true }, ... }, ... ].</summary>
+        </member>
+        <member name="M:Launcher.Core.Fabric.FabricMetaParser.ParseLoaders(System.String)">
+            <exception cref="T:Launcher.Core.Errors.FabricException">Формат ответа не соответствует ожидаемому.</exception>
+        </member>
+        <member name="T:Launcher.Core.Forge.ForgeInstaller">
+            <summary>
+            Установка Forge (1.13 и новее) официальным установщиком в режиме "--installClient":
+            игра → установщик с maven.minecraftforge.net (проверка SHA-1, если репозиторий её публикует) → запуск установщика
+            нужной Java → проверка, что профиль версии появился и читается.
+            Установщик сам скачивает библиотеки и выполняет обработку (processors), поэтому установка может занять несколько минут.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Forge.ForgeInstaller.InstallAsync(System.String,System.String,Launcher.Core.Installation.InstallOptions,System.IProgress{System.String},System.Threading.CancellationToken)">
+            <param name="forgeVersion">Версия Forge или null — рекомендованная (если нет — последняя).</param>
+            <param name="status">Короткие сообщения о ходе установки.</param>
+        </member>
+        <member name="M:Launcher.Core.Forge.ForgeInstaller.ReadVersionId(System.String,System.String)">
+            <summary>Идентификатор версии берётся из version.json внутри установщика — так он совпадёт с тем, что создаст сам установщик.</summary>
+        </member>
+        <member name="T:Launcher.Core.Forge.IForgeMetaClient">
+            <summary>Официальные источники Forge: список рекомендованных сборок и Maven-репозиторий с установщиками.</summary>
+        </member>
+        <member name="M:Launcher.Core.Forge.IForgeMetaClient.GetPromotionsAsync(System.Threading.CancellationToken)">
+            <summary>Таблица promotions_slim.json: ключ вида "1.21.1-recommended" → версия Forge.</summary>
+            <exception cref="T:Launcher.Core.Errors.ForgeException">Сервис недоступен или формат неожиданный.</exception>
+        </member>
+        <member name="M:Launcher.Core.Forge.IForgeMetaClient.GetInstallerSha1Async(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>SHA-1 установщика из Maven-репозитория (файл .sha1) или null, если репозиторий его не публикует.</summary>
+            <exception cref="T:Launcher.Core.Errors.ForgeException">Репозиторий недоступен.</exception>
+        </member>
+        <member name="T:Launcher.Core.Forge.ForgeVersions">
+            <summary>Разбор списка сборок и построение адреса установщика.</summary>
+        </member>
+        <member name="M:Launcher.Core.Forge.ForgeVersions.SafeVersion">
+            <remarks>
+            Pattern:<br/>
+            <code>^[0-9A-Za-z][0-9A-Za-z._\\-]{0,39}$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match an ASCII letter or digit.<br/>
+            ○ Match a character in the set [\-.0-9A-Z_a-z] atomically at most 39 times.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Launcher.Core.Forge.ForgeVersions.ParsePromotions(System.String)">
+            <exception cref="T:Launcher.Core.Errors.ForgeException">Формат ответа неожиданный.</exception>
+        </member>
+        <member name="M:Launcher.Core.Forge.ForgeVersions.Choose(System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.String,System.String)">
+            <summary>Явно заданная версия (если указана) → рекомендованная → последняя.</summary>
+            <exception cref="T:Launcher.Core.Errors.ForgeException">Для версии Minecraft нет сборок Forge или версия записана некорректно.</exception>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.CommandLineSplitter">
+            <summary>Делит строку аргументов на отдельные аргументы; значения с пробелами берутся в двойные кавычки.</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.CommandLineSplitter.Split(System.String)">
+            <exception cref="T:Launcher.Core.Errors.LauncherException">В строке не закрыта кавычка.</exception>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.GameLaunchService">
+            <summary>
+            Подготавливает и запускает установленную версию Minecraft:
+            проверяет файлы и Java, собирает classpath и аргументы по формату версии, запускает процесс.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.GameLaunchService.PrepareAsync(Launcher.Core.Profiles.GameProfile,Launcher.Core.Authentication.GameAccount,System.Threading.CancellationToken)">
+            <summary>Проверяет всё необходимое и собирает план запуска, ничего не запуская.</summary>
+            <exception cref="T:Launcher.Core.Errors.LauncherException">Версия не установлена, не хватает файлов, нет подходящей Java и т.п. Сообщение понятно пользователю.</exception>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.GameLaunchService.Launch(Launcher.Core.GameLaunch.GameLaunchPlan,System.Action{Launcher.Core.GameLaunch.GameOutputLine})">
+            <summary>Запускает процесс по плану. Вывод игры передаётся в <paramref name="onOutput"/>.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.GameLaunchPlan">
+            <summary>Готовый к запуску план: что именно будет выполнено.</summary>
+            <param name="Arguments">Все аргументы Java (JVM, главный класс, аргументы игры).</param>
+            <param name="SecretValues">Значения, которые нельзя показывать в логах и на экране (токены).</param>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.GameLaunchPlan.#ctor(System.String,System.String,System.String,System.Int32,System.Collections.Generic.IReadOnlyList{System.String},System.String,System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>Готовый к запуску план: что именно будет выполнено.</summary>
+            <param name="Arguments">Все аргументы Java (JVM, главный класс, аргументы игры).</param>
+            <param name="SecretValues">Значения, которые нельзя показывать в логах и на экране (токены).</param>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.GameLaunchPlan.Arguments">
+            <summary>Все аргументы Java (JVM, главный класс, аргументы игры).</summary>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.GameLaunchPlan.SecretValues">
+            <summary>Значения, которые нельзя показывать в логах и на экране (токены).</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.GameLaunchPlan.ToDisplayCommandLine">
+            <summary>Командная строка для показа пользователю и записи в журнал: секреты заменены на ***.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.GameOutputLine">
+            <summary>Строка вывода игры.</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.GameOutputLine.#ctor(System.Boolean,System.String)">
+            <summary>Строка вывода игры.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.GameExitResult">
+            <summary>Как завершилась игра.</summary>
+            <param name="Killed">true — процесс был остановлен лаунчером.</param>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.GameExitResult.#ctor(System.Int32,System.Boolean)">
+            <summary>Как завершилась игра.</summary>
+            <param name="Killed">true — процесс был остановлен лаунчером.</param>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.GameExitResult.Killed">
+            <summary>true — процесс был остановлен лаунчером.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.IGameProcess">
+            <summary>Запущенный процесс игры.</summary>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.IGameProcess.Completion">
+            <summary>Завершается, когда игра закрылась (и весь её вывод получен).</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.IGameProcess.Kill">
+            <summary>Останавливает игру вместе с дочерними процессами. Безопасно вызывать, если игра уже закрыта.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.IGameProcessStarter">
+            <summary>Запускает Java-процесс по плану (реализация — в Infrastructure).</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.IGameProcessStarter.Start(Launcher.Core.GameLaunch.GameLaunchPlan,System.Action{Launcher.Core.GameLaunch.GameOutputLine})">
+            <exception cref="T:Launcher.Core.Errors.LaunchException">Процесс не удалось запустить.</exception>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.GcOption">
+            <summary>Сборщик мусора Java, который можно выбрать для профиля.</summary>
+            <param name="Id">Короткий постоянный идентификатор (хранится в профиле).</param>
+            <param name="Flag">Аргумент JVM, включающий этот сборщик.</param>
+            <param name="MinJava">Минимальная версия Java, на которой сборщик поддерживается.</param>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.GcOption.#ctor(System.String,System.String,System.String,System.String,System.Int32)">
+            <summary>Сборщик мусора Java, который можно выбрать для профиля.</summary>
+            <param name="Id">Короткий постоянный идентификатор (хранится в профиле).</param>
+            <param name="Flag">Аргумент JVM, включающий этот сборщик.</param>
+            <param name="MinJava">Минимальная версия Java, на которой сборщик поддерживается.</param>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.GcOption.Id">
+            <summary>Короткий постоянный идентификатор (хранится в профиле).</summary>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.GcOption.Flag">
+            <summary>Аргумент JVM, включающий этот сборщик.</summary>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.GcOption.MinJava">
+            <summary>Минимальная версия Java, на которой сборщик поддерживается.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.GarbageCollectors">
+            <summary>Список сборщиков мусора и проверки вокруг них. Пустой выбор — «по умолчанию»: аргумент не добавляется.</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.GarbageCollectors.ContainsGcFlag(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>Есть ли среди аргументов JVM уже выбранный сборщик: два сборщика сразу Java не принимает.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.LaunchArgumentBuilder">
+            <summary>Вычисляет итоговые JVM- и игровые аргументы: применяет правила и подставляет переменные.</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.LaunchArgumentBuilder.Build(Launcher.Core.GameLaunch.LaunchArguments,Launcher.Core.Libraries.PlatformInfo,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Collections.Generic.IReadOnlySet{System.String})">
+            <param name="features">Включённые возможности (например "is_demo_user"). Невключённые считаются выключенными.</param>
+            <exception cref="T:Launcher.Core.Errors.LaunchException">В аргументах осталась переменная, значение которой лаунчер не знает.</exception>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.LaunchArgumentBuilder.IsAllowed(System.Collections.Generic.IReadOnlyList{Launcher.Core.GameLaunch.ArgumentRule},Launcher.Core.Libraries.PlatformInfo,System.Collections.Generic.IReadOnlySet{System.String})">
+            <summary>Правила проверяются по порядку, решает последнее подошедшее; без правил аргумент разрешён.</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.LaunchArgumentBuilder.Substitute(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String})">
+            <summary>Заменяет ${имя} значениями. Неизвестная переменная — ошибка, а не молчаливый мусор в командной строке.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.ArgumentRule">
+            <summary>Условие применимости аргумента (поле "rules" в метаданных версии).</summary>
+            <param name="Features">Требуемые значения "features", например is_demo_user = true.</param>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.ArgumentRule.#ctor(System.Boolean,System.String,System.String,System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.Boolean})">
+            <summary>Условие применимости аргумента (поле "rules" в метаданных версии).</summary>
+            <param name="Features">Требуемые значения "features", например is_demo_user = true.</param>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.ArgumentRule.Features">
+            <summary>Требуемые значения "features", например is_demo_user = true.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.ArgumentItem">
+            <summary>Один или несколько аргументов с условиями.</summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.ArgumentItem.#ctor(System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{Launcher.Core.GameLaunch.ArgumentRule})">
+            <summary>Один или несколько аргументов с условиями.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.LaunchArguments">
+            <summary>Аргументы запуска версии: JVM и игры.</summary>
+            <param name="IsLegacy">true — старый формат (строка minecraftArguments), JVM-аргументы заданы лаунчером по умолчанию.</param>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.LaunchArguments.#ctor(System.Boolean,System.Collections.Generic.IReadOnlyList{Launcher.Core.GameLaunch.ArgumentItem},System.Collections.Generic.IReadOnlyList{Launcher.Core.GameLaunch.ArgumentItem})">
+            <summary>Аргументы запуска версии: JVM и игры.</summary>
+            <param name="IsLegacy">true — старый формат (строка minecraftArguments), JVM-аргументы заданы лаунчером по умолчанию.</param>
+        </member>
+        <member name="P:Launcher.Core.GameLaunch.LaunchArguments.IsLegacy">
+            <summary>true — старый формат (строка minecraftArguments), JVM-аргументы заданы лаунчером по умолчанию.</summary>
+        </member>
+        <member name="T:Launcher.Core.GameLaunch.LaunchArgumentsParser">
+            <summary>
+            Разбор аргументов запуска из JSON версии. Поддерживает оба формата Mojang:
+            новый (объект "arguments" с "jvm" и "game", 1.13+) и старый (строка "minecraftArguments").
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.GameLaunch.LaunchArgumentsParser.Parse(System.String)">
+            <exception cref="T:Launcher.Core.Errors.VersionMetadataException">В JSON нет данных об аргументах или они повреждены.</exception>
+        </member>
+        <member name="T:Launcher.Core.Installation.InstallOptions">
+            <summary>Параметры установки.</summary>
+            <param name="RefreshManifest">Принудительно обновить список версий перед установкой.</param>
+            <param name="MaxConcurrency">Сколько файлов качать одновременно.</param>
+        </member>
+        <member name="M:Launcher.Core.Installation.InstallOptions.#ctor(System.Boolean,System.Int32)">
+            <summary>Параметры установки.</summary>
+            <param name="RefreshManifest">Принудительно обновить список версий перед установкой.</param>
+            <param name="MaxConcurrency">Сколько файлов качать одновременно.</param>
+        </member>
+        <member name="P:Launcher.Core.Installation.InstallOptions.RefreshManifest">
+            <summary>Принудительно обновить список версий перед установкой.</summary>
+        </member>
+        <member name="P:Launcher.Core.Installation.InstallOptions.MaxConcurrency">
+            <summary>Сколько файлов качать одновременно.</summary>
+        </member>
+        <member name="T:Launcher.Core.Installation.InstallProgress">
+            <summary>Прогресс установки. Числа файлов/байт заполняются на стадии Files.</summary>
+        </member>
+        <member name="M:Launcher.Core.Installation.InstallProgress.#ctor(Launcher.Core.Installation.InstallStage,System.Int32,System.Int32,System.Int64,System.Int64)">
+            <summary>Прогресс установки. Числа файлов/байт заполняются на стадии Files.</summary>
+        </member>
+        <member name="T:Launcher.Core.Installation.IMinecraftInstaller">
+            <summary>Устанавливает (или проверяет и чинит) выбранную версию Minecraft.</summary>
+        </member>
+        <member name="T:Launcher.Core.Installation.ILocalVersionInstaller">
+            <summary>Ставит версию по готовому JSON с диска (без скачивания клиентского jar).</summary>
+        </member>
+        <member name="T:Launcher.Core.Installation.InstalledVersionRepository">
+            <summary>Читает описание уже установленной версии с диска.</summary>
+        </member>
+        <member name="M:Launcher.Core.Installation.InstalledVersionRepository.LoadAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Загружает версию; если она наследуется от другой (Fabric, Forge), объединяет всю цепочку.</summary>
+            <exception cref="T:Launcher.Core.Errors.VersionNotFoundException">Версия или её базовая версия не установлена.</exception>
+        </member>
+        <member name="T:Launcher.Core.Installation.MinecraftInstaller">
+            <summary>
+            Установка версии: JSON версии → индекс ресурсов → клиентский JAR, библиотеки, ресурсы → распаковка natives.
+            Повторный запуск проверяет все файлы и докачивает только отсутствующие или повреждённые.
+            </summary>
+        </member>
+        <member name="F:Launcher.Core.Installation.MinecraftInstaller.DefaultAssetBaseUri">
+            <summary>
+            Официальное хранилище игровых ресурсов Mojang. Метаданные содержат только хеши ресурсов,
+            а адрес файла строится как {база}/{первые 2 символа хеша}/{хеш}.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Installation.MinecraftInstaller.InstallLocalAsync(System.String,System.String,Launcher.Core.Installation.InstallOptions,System.IProgress{Launcher.Core.Installation.InstallProgress},System.Threading.CancellationToken)">
+            <summary>
+            Ставит версию по готовому JSON (не из списка Mojang): библиотеки, ресурсы, natives. Клиентский jar не скачивается —
+            его кладёт вызывающий (своя версия из jar-файла).
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Installation.MinecraftLayout">
+            <summary>Структура папок игры. Все пути из метаданных проверяются: выйти за пределы папки игры нельзя.</summary>
+        </member>
+        <member name="M:Launcher.Core.Installation.MinecraftLayout.InstanceDirectory(System.String)">
+            <summary>Папка игры конкретного профиля (saves, mods, options.txt...). Для каждого профиля своя.</summary>
+        </member>
+        <member name="M:Launcher.Core.Installation.MinecraftLayout.VirtualAssetsDirectory(System.String)">
+            <summary>Папка «виртуальных» ресурсов для старых версий (assets/virtual/{id}).</summary>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.IJavaDetector">
+            <summary>Ищет установленные на компьютере Java.</summary>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.IJavaDetector.DetectAsync(System.Threading.CancellationToken)">
+            <returns>Найденные и проверенные Java в порядке приоритета (JAVA_HOME, PATH, установки, среды Mojang).</returns>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.ProcessResult">
+            <summary>Результат запуска внешней программы.</summary>
+            <param name="ExitCode">Код завершения; -1, если программа не запустилась или была прервана.</param>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.ProcessResult.#ctor(System.Int32,System.String,System.String,System.Boolean)">
+            <summary>Результат запуска внешней программы.</summary>
+            <param name="ExitCode">Код завершения; -1, если программа не запустилась или была прервана.</param>
+        </member>
+        <member name="P:Launcher.Core.JavaRuntime.ProcessResult.ExitCode">
+            <summary>Код завершения; -1, если программа не запустилась или была прервана.</summary>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.IProcessRunner">
+            <summary>Запуск внешней программы с ограничением по времени (интерфейс нужен, чтобы подменять его в тестах).</summary>
+        </member>
+        <member name="P:Launcher.Core.JavaRuntime.JavaExecutable.FileName">
+            <summary>"java.exe" в Windows, "java" в остальных системах.</summary>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaExecutable.ResolvePath(System.String)">
+            <summary>
+            Принимает путь к файлу java или к папке установки Java (JAVA_HOME) и возвращает путь к исполняемому файлу.
+            Существование файла не проверяется.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.JavaSource">
+            <summary>Откуда взята найденная Java.</summary>
+        </member>
+        <member name="F:Launcher.Core.JavaRuntime.JavaSource.Configured">
+            <summary>Путь, который пользователь указал сам (команда "java set").</summary>
+        </member>
+        <member name="F:Launcher.Core.JavaRuntime.JavaSource.Installed">
+            <summary>Обычная установка JDK/JRE (Program Files, /usr/lib/jvm и т.п.).</summary>
+        </member>
+        <member name="F:Launcher.Core.JavaRuntime.JavaSource.MojangRuntime">
+            <summary>Среда, скачанная официальным лаунчером Minecraft.</summary>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.JavaInstallation">
+            <summary>Найденная и проверенная запуском Java.</summary>
+            <param name="Path">Полный путь к java (java.exe).</param>
+            <param name="MajorVersion">Основная версия: 8, 17, 21 и т.д. (для "1.8.0_392" — 8).</param>
+            <param name="Version">Полная строка версии из java.version.</param>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaInstallation.#ctor(System.String,System.Int32,System.String,System.String,System.Boolean,Launcher.Core.JavaRuntime.JavaSource)">
+            <summary>Найденная и проверенная запуском Java.</summary>
+            <param name="Path">Полный путь к java (java.exe).</param>
+            <param name="MajorVersion">Основная версия: 8, 17, 21 и т.д. (для "1.8.0_392" — 8).</param>
+            <param name="Version">Полная строка версии из java.version.</param>
+        </member>
+        <member name="P:Launcher.Core.JavaRuntime.JavaInstallation.Path">
+            <summary>Полный путь к java (java.exe).</summary>
+        </member>
+        <member name="P:Launcher.Core.JavaRuntime.JavaInstallation.MajorVersion">
+            <summary>Основная версия: 8, 17, 21 и т.д. (для "1.8.0_392" — 8).</summary>
+        </member>
+        <member name="P:Launcher.Core.JavaRuntime.JavaInstallation.Version">
+            <summary>Полная строка версии из java.version.</summary>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.JavaResolution">
+            <summary>Результат подбора Java под требования версии Minecraft.</summary>
+            <param name="Warning">Пояснение, если подобрана не рекомендованная (более новая) Java; иначе null.</param>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaResolution.#ctor(Launcher.Core.JavaRuntime.JavaInstallation,System.String)">
+            <summary>Результат подбора Java под требования версии Minecraft.</summary>
+            <param name="Warning">Пояснение, если подобрана не рекомендованная (более новая) Java; иначе null.</param>
+        </member>
+        <member name="P:Launcher.Core.JavaRuntime.JavaResolution.Warning">
+            <summary>Пояснение, если подобрана не рекомендованная (более новая) Java; иначе null.</summary>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.JavaProbe">
+            <summary>Проверяет, что файл действительно запускается как Java, и узнаёт её версию.</summary>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaProbe.ProbeAsync(System.String,Launcher.Core.JavaRuntime.JavaSource,System.Threading.CancellationToken)">
+            <returns>Описание Java или null, если файл не запустился или это не Java.</returns>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.JavaProbeInfo">
+            <summary>Данные о Java, извлечённые из вывода "java -XshowSettings:properties -version".</summary>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaProbeInfo.#ctor(System.Int32,System.String,System.String,System.Boolean)">
+            <summary>Данные о Java, извлечённые из вывода "java -XshowSettings:properties -version".</summary>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.JavaProbeOutputParser">
+            <summary>Разбор вывода запуска Java (он идёт в stderr).</summary>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaProbeOutputParser.Parse(System.String)">
+            <returns>Информация о Java или null, если вывод не похож на вывод Java.</returns>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaProbeOutputParser.ParseMajor(System.String)">
+            <summary>"1.8.0_392" → 8, "17.0.9" → 17, "21" → 21, "21-ea" → 21.</summary>
+        </member>
+        <member name="F:Launcher.Core.JavaRuntime.JavaRequirement.LegacyDefaultMajor">
+            <summary>Старые версии Minecraft не указывают javaVersion в метаданных — для них нужна Java 8.</summary>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.JavaResolver">
+            <summary>Подбирает Java для запуска: сначала путь, заданный пользователем, затем автоматический поиск.</summary>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaResolver.ResolveAsync(System.Int32,System.String,System.Threading.CancellationToken)">
+            <param name="requiredMajor">Минимально необходимая основная версия Java.</param>
+            <param name="configuredPath">Путь, настроенный пользователем, или null.</param>
+            <exception cref="T:Launcher.Core.Errors.JavaNotFoundException">Подходящей Java нет — сообщение содержит инструкцию, что делать.</exception>
+        </member>
+        <member name="T:Launcher.Core.JavaRuntime.JavaSelector">
+            <summary>Выбирает из найденных Java ту, что подходит версии Minecraft.</summary>
+        </member>
+        <member name="M:Launcher.Core.JavaRuntime.JavaSelector.Select(System.Collections.Generic.IEnumerable{Launcher.Core.JavaRuntime.JavaInstallation},System.Int32)">
+            <summary>
+            Правила: Java старее требуемой не подходит. Точное совпадение основной версии лучше всего,
+            иначе берётся ближайшая более новая (с предупреждением). 64-битная предпочтительнее 32-битной,
+            при равенстве сохраняется порядок обнаружения.
+            </summary>
+            <returns>Подходящая Java или null.</returns>
+        </member>
+        <member name="T:Launcher.Core.Libraries.ResolvedLibrary">
+            <summary>Библиотека, подходящая для текущей платформы.</summary>
+            <param name="Artifact">Основной JAR (идёт в classpath), если есть.</param>
+            <param name="NativeArtifact">Архив natives, который нужно распаковать (старые версии), если есть.</param>
+        </member>
+        <member name="M:Launcher.Core.Libraries.ResolvedLibrary.#ctor(System.String,Launcher.Core.Versions.DownloadInfo,Launcher.Core.Versions.DownloadInfo,System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>Библиотека, подходящая для текущей платформы.</summary>
+            <param name="Artifact">Основной JAR (идёт в classpath), если есть.</param>
+            <param name="NativeArtifact">Архив natives, который нужно распаковать (старые версии), если есть.</param>
+        </member>
+        <member name="P:Launcher.Core.Libraries.ResolvedLibrary.Artifact">
+            <summary>Основной JAR (идёт в classpath), если есть.</summary>
+        </member>
+        <member name="P:Launcher.Core.Libraries.ResolvedLibrary.NativeArtifact">
+            <summary>Архив natives, который нужно распаковать (старые версии), если есть.</summary>
+        </member>
+        <member name="T:Launcher.Core.Libraries.LibraryResolver">
+            <summary>Применяет правила библиотек и выбирает файлы для конкретной ОС и архитектуры.</summary>
+        </member>
+        <member name="M:Launcher.Core.Libraries.LibraryResolver.IsAllowed(System.Collections.Generic.IReadOnlyList{Launcher.Core.Versions.LibraryRule},Launcher.Core.Libraries.PlatformInfo)">
+            <summary>Правила проверяются по порядку; последнее подошедшее решает. Без правил — разрешено, если ни одно не подошло — запрещено.</summary>
+        </member>
+        <member name="T:Launcher.Core.Libraries.MavenCoordinates">
+            <summary>Координаты Maven вида группа:имя:версия[:классификатор][@расширение].</summary>
+        </member>
+        <member name="M:Launcher.Core.Libraries.MavenCoordinates.ToRelativePath(System.String)">
+            <summary>Относительный путь файла в репозитории: com/example/lib/1.0/lib-1.0.jar.</summary>
+            <exception cref="T:Launcher.Core.Errors.VersionMetadataException">Координаты записаны неверно.</exception>
+        </member>
+        <member name="M:Launcher.Core.Libraries.MavenCoordinates.KeyWithoutVersion(System.String)">
+            <summary>Ключ «группа:имя[:классификатор]» без версии — по нему библиотеки потомка заменяют библиотеки базовой версии.</summary>
+        </member>
+        <member name="T:Launcher.Core.Libraries.NativesExtractor">
+            <summary>Распаковка нативных библиотек (dll/so/dylib) из JAR/ZIP-архива.</summary>
+        </member>
+        <member name="M:Launcher.Core.Libraries.NativesExtractor.Extract(System.String,System.String,System.Collections.Generic.IReadOnlyList{System.String})">
+            <param name="exclude">Префиксы путей внутри архива, которые не нужно распаковывать (например "META-INF/").</param>
+            <exception cref="T:Launcher.Core.Errors.LauncherException">Архив пытается записать файл за пределы целевой папки.</exception>
+        </member>
+        <member name="T:Launcher.Core.Libraries.NativesPreparer">
+            <summary>Распаковка нативных библиотек версии в папку natives (нужна старым версиям с классификаторами natives).</summary>
+        </member>
+        <member name="M:Launcher.Core.Libraries.NativesPreparer.Prepare(Launcher.Core.Installation.MinecraftLayout,System.String,System.Collections.Generic.IReadOnlyList{Launcher.Core.Libraries.ResolvedLibrary})">
+            <summary>Пересоздаёт папку natives и распаковывает в неё все нужные архивы.</summary>
+        </member>
+        <member name="M:Launcher.Core.Libraries.NativesPreparer.IsMissing(Launcher.Core.Installation.MinecraftLayout,System.String,System.Collections.Generic.IReadOnlyList{Launcher.Core.Libraries.ResolvedLibrary})">
+            <summary>true, если natives нужны, но папка отсутствует или пуста.</summary>
+        </member>
+        <member name="T:Launcher.Core.Libraries.PlatformInfo">
+            <summary>Операционная система и архитектура в терминах метаданных Mojang.</summary>
+            <param name="OsName">"windows", "linux" или "osx".</param>
+            <param name="Arch">"x86", "x86_64" или "arm64".</param>
+            <param name="OsVersion">Версия ОС (нужна только для редких правил с regex по версии).</param>
+        </member>
+        <member name="M:Launcher.Core.Libraries.PlatformInfo.#ctor(System.String,System.String,System.String)">
+            <summary>Операционная система и архитектура в терминах метаданных Mojang.</summary>
+            <param name="OsName">"windows", "linux" или "osx".</param>
+            <param name="Arch">"x86", "x86_64" или "arm64".</param>
+            <param name="OsVersion">Версия ОС (нужна только для редких правил с regex по версии).</param>
+        </member>
+        <member name="P:Launcher.Core.Libraries.PlatformInfo.OsName">
+            <summary>"windows", "linux" или "osx".</summary>
+        </member>
+        <member name="P:Launcher.Core.Libraries.PlatformInfo.Arch">
+            <summary>"x86", "x86_64" или "arm64".</summary>
+        </member>
+        <member name="P:Launcher.Core.Libraries.PlatformInfo.OsVersion">
+            <summary>Версия ОС (нужна только для редких правил с regex по версии).</summary>
+        </member>
+        <member name="P:Launcher.Core.Libraries.PlatformInfo.ArchBits">
+            <summary>"32" или "64" — подставляется вместо ${arch} в именах классификаторов.</summary>
+        </member>
+        <member name="T:Launcher.Core.Logging.ILauncherLogger">
+            <summary>Простой логгер ядра. Секреты (токены, пароли) в логи передавать нельзя.</summary>
+        </member>
+        <member name="T:Launcher.Core.Logging.NullLauncherLogger">
+            <summary>Логгер, который ничего не делает (для тестов и значений по умолчанию).</summary>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.CurseForgeFileRef">
+            <summary>Одна запись из manifest.json сборки CurseForge: проект и файл.</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.CurseForgeFileRef.#ctor(System.Int64,System.Int64,System.Boolean)">
+            <summary>Одна запись из manifest.json сборки CurseForge: проект и файл.</summary>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.CurseForgeManifest">
+            <summary>Содержимое manifest.json сборки CurseForge.</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.CurseForgeManifest.#ctor(System.String,System.String,System.String,Launcher.Core.Versions.LoaderKind,System.String,System.String,System.Collections.Generic.IReadOnlyList{Launcher.Core.Modpacks.CurseForgeFileRef})">
+            <summary>Содержимое manifest.json сборки CurseForge.</summary>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.CurseForgeFile">
+            <summary>Файл, описанный API CurseForge. <paramref name="DownloadUrl"/> пуст, если автор запретил скачивание сторонними программами.</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.CurseForgeFile.#ctor(System.Int64,System.Int64,System.String,System.Uri,System.String,System.Int64)">
+            <summary>Файл, описанный API CurseForge. <paramref name="DownloadUrl"/> пуст, если автор запретил скачивание сторонними программами.</summary>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.ICurseForgeClient">
+            <summary>Доступ к API CurseForge (https://docs.curseforge.com/rest-api/) — нужен ключ API.</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.ICurseForgeClient.GetFilesAsync(System.Collections.Generic.IReadOnlyList{System.Int64},System.Threading.CancellationToken)">
+            <summary>Сведения о файлах по их номерам (POST /v1/mods/files). Найденные файлы возвращаются в любом порядке.</summary>
+            <exception cref="T:Launcher.Core.Errors.ModException">Нет ключа, ключ отклонён или сервис недоступен.</exception>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.CurseForgePackReader">
+            <summary>Определение формата сборки и чтение manifest.json (формат: https://gdlauncher.com/docs/modpack-manifest-format).</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.CurseForgePackReader.SafeFolder">
+            <remarks>
+            Pattern:<br/>
+            <code>^[A-Za-z0-9 _.\\-]{1,64}$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match a character in the set [ \-.0-9A-Z_a-z] atomically at least 1 and at most 64 times.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.CurseForgePackReader.Detect(System.String)">
+            <summary>Смотрит внутрь архива: modrinth.index.json — Modrinth, manifest.json — CurseForge.</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.CurseForgePackReader.Read(System.String)">
+            <exception cref="T:Launcher.Core.Errors.ModException">Файл не похож на сборку CurseForge или рассчитан на неподдерживаемый загрузчик.</exception>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.CurseForgeParser">
+            <summary>Разбор ответа POST /v1/mods/files.</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.CurseForgeParser.Sha1Pattern">
+            <remarks>
+            Pattern:<br/>
+            <code>^[0-9a-fA-F]{40}$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match a hexadecimal digit exactly 40 times.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.CurseForgeResolver">
+            <summary>
+            Превращает manifest.json в описание для общего импортёра (<see cref="T:Launcher.Core.Modpacks.MrpackInfo"/>): спрашивает у CurseForge адреса файлов.
+            Файлы, которые автор запретил скачивать сторонним программам, НЕ обходятся — они попадают в список для ручной загрузки.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.MrpackImporter">
+            <summary>
+            Раскладывает сборку Modrinth по папке профиля: скачивает файлы с проверкой SHA-1 и распаковывает папки overrides.
+            Саму игру и загрузчик ставит вызывающий код (Minecraft/Fabric/Forge по данным <see cref="T:Launcher.Core.Modpacks.MrpackInfo"/>).
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.MrpackImporter.ExtractOverrides(System.String,System.String,Launcher.Core.Modpacks.MrpackInfo,System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+            <summary>Сначала overrides, затем client-overrides (они перекрывают общие файлы), как сказано в спецификации.</summary>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.MrpackFile">
+            <summary>Один файл сборки: куда положить и откуда скачать.</summary>
+            <param name="Path">Путь относительно папки профиля (уже проверен на безопасность).</param>
+            <param name="Sha1">Контрольная сумма из сборки — файл без неё не принимается.</param>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.MrpackFile.#ctor(System.String,System.String,System.Collections.Generic.IReadOnlyList{System.Uri},System.Int64)">
+            <summary>Один файл сборки: куда положить и откуда скачать.</summary>
+            <param name="Path">Путь относительно папки профиля (уже проверен на безопасность).</param>
+            <param name="Sha1">Контрольная сумма из сборки — файл без неё не принимается.</param>
+        </member>
+        <member name="P:Launcher.Core.Modpacks.MrpackFile.Path">
+            <summary>Путь относительно папки профиля (уже проверен на безопасность).</summary>
+        </member>
+        <member name="P:Launcher.Core.Modpacks.MrpackFile.Sha1">
+            <summary>Контрольная сумма из сборки — файл без неё не принимается.</summary>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.MrpackInfo">
+            <summary>Содержимое сборки Modrinth (.mrpack), прочитанное из <c>modrinth.index.json</c>.</summary>
+            <param name="Files">Файлы, которые нужны клиенту (без помеченных как «клиенту не нужны»).</param>
+            <param name="OverridesFolders">Папки архива с файлами настроек; null — «overrides» и «client-overrides» (Modrinth).</param>
+            <param name="ExtraAllowedHosts">Дополнительные серверы, с которых разрешено скачивание (для сборок CurseForge).</param>
+            <param name="Notes">Замечания для пользователя (например, что скачать вручную).</param>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.MrpackInfo.#ctor(System.String,System.String,System.String,System.String,Launcher.Core.Versions.LoaderKind,System.String,System.Collections.Generic.IReadOnlyList{Launcher.Core.Modpacks.MrpackFile},System.Int32,System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>Содержимое сборки Modrinth (.mrpack), прочитанное из <c>modrinth.index.json</c>.</summary>
+            <param name="Files">Файлы, которые нужны клиенту (без помеченных как «клиенту не нужны»).</param>
+            <param name="OverridesFolders">Папки архива с файлами настроек; null — «overrides» и «client-overrides» (Modrinth).</param>
+            <param name="ExtraAllowedHosts">Дополнительные серверы, с которых разрешено скачивание (для сборок CurseForge).</param>
+            <param name="Notes">Замечания для пользователя (например, что скачать вручную).</param>
+        </member>
+        <member name="P:Launcher.Core.Modpacks.MrpackInfo.Files">
+            <summary>Файлы, которые нужны клиенту (без помеченных как «клиенту не нужны»).</summary>
+        </member>
+        <member name="P:Launcher.Core.Modpacks.MrpackInfo.OverridesFolders">
+            <summary>Папки архива с файлами настроек; null — «overrides» и «client-overrides» (Modrinth).</summary>
+        </member>
+        <member name="P:Launcher.Core.Modpacks.MrpackInfo.ExtraAllowedHosts">
+            <summary>Дополнительные серверы, с которых разрешено скачивание (для сборок CurseForge).</summary>
+        </member>
+        <member name="P:Launcher.Core.Modpacks.MrpackInfo.Notes">
+            <summary>Замечания для пользователя (например, что скачать вручную).</summary>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.MrpackReader">
+            <summary>Чтение формата .mrpack (https://docs.modrinth.com/modpacks/format/, formatVersion 1).</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.MrpackReader.Read(System.String)">
+            <exception cref="T:Launcher.Core.Errors.ModException">Файл не похож на сборку Modrinth, повреждён или рассчитан на неподдерживаемый загрузчик.</exception>
+        </member>
+        <member name="T:Launcher.Core.Modpacks.SafePath">
+            <summary>Проверка путей из чужих архивов и сборок: файл обязан остаться внутри папки профиля.</summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.SafePath.Resolve(System.String,System.String)">
+            <summary>
+            Склеивает папку профиля и относительный путь из сборки. Возвращает null, если путь опасен:
+            пустой, абсолютный, с диском, с «..» или выходит за пределы папки.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Modpacks.SafePath.IsRunnable(System.String)">
+            <summary>Файлы, которые можно запустить двойным щелчком: в сборках им делать нечего, они пропускаются.</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.IModrinthClient">
+            <summary>Доступ к каталогу Modrinth (https://docs.modrinth.com/api/).</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.IModrinthClient.GetVersionsAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>Версии проекта, подходящие под версию игры (и загрузчик для модов). Порядок не гарантируется.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.IModrinthClient.GetVersionAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Одна версия по идентификатору или null, если её нет.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.IModrinthClient.GetProjectsAsync(System.Collections.Generic.IReadOnlyCollection{System.String},System.Threading.CancellationToken)">
+            <summary>Проекты по идентификаторам или slug. Неизвестные пропускаются.</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.ModInstallResult">
+            <summary>Результат установки: что поставлено (включая зависимости) и о чём стоит предупредить.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModInstallResult.#ctor(System.Collections.Generic.IReadOnlyList{Launcher.Core.Mods.InstalledMod},System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>Результат установки: что поставлено (включая зависимости) и о чём стоит предупредить.</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.ModManager">
+            <summary>Установка, удаление и обновление модов, ресурспаков и шейдеров профиля через каталог Modrinth.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModManager.LoaderFor(Launcher.Core.Versions.VersionLabel,Launcher.Core.Mods.ModContentType)">
+            <summary>Загрузчик для запросов к Modrinth. Моды без Fabric, Quilt, Forge или NeoForge поставить нельзя.</summary>
+            <exception cref="T:Launcher.Core.Errors.ModException">В профиле без загрузчика нельзя ставить моды.</exception>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModManager.GetInstalled(System.String)">
+            <summary>Установленное в профиле. Записи о файлах, которых уже нет на диске (пользователь удалил вручную), убираются.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModManager.CheckUpdatesAsync(System.String,Launcher.Core.Versions.VersionLabel,System.Threading.CancellationToken)">
+            <summary>Для каждого установленного ищет более новую версию, подходящую профилю.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModManager.FillTitlesAsync(System.Collections.Generic.List{Launcher.Core.Mods.ModManager.PlanItem},System.Threading.CancellationToken)">
+            <summary>Подписи зависимостей — названия проектов. Если узнать не удалось, остаются названия версий: установке это не мешает.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModManager.ValidateFile(Launcher.Core.Mods.ModFile)">
+            <summary>Файлы берутся только из каталога Modrinth, по https и с контрольной суммой; имя файла не должно выходить из папки.</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.ModContentType">
+            <summary>Что ставится: от типа зависят папка профиля и способ подбора версий.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModContentTypes.ProjectType(Launcher.Core.Mods.ModContentType)">
+            <summary>Название типа в Modrinth (<c>project_type</c>).</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModContentTypes.FolderName(Launcher.Core.Mods.ModContentType)">
+            <summary>Папка внутри папки профиля.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModContentTypes.ModrinthLoader(Launcher.Core.Versions.LoaderKind)">
+            <summary>
+            Загрузчик для фильтра Modrinth. Нужен только модам: у ресурспаков и шейдеров он не определяет совместимость.
+            null для мода означает, что профиль без загрузчика — моды в него не ставятся.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.ModSort">
+            <summary>Порядок результатов поиска (значения параметра <c>index</c> в Modrinth).</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.ModSearchQuery">
+            <param name="Text">Строка поиска (может быть пустой — тогда показываются самые подходящие).</param>
+            <param name="Loader">Загрузчик для модов (fabric/forge); для остальных типов игнорируется.</param>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModSearchQuery.#ctor(System.String,Launcher.Core.Mods.ModContentType,System.String,System.String,Launcher.Core.Mods.ModSort,System.Int32,System.Int32)">
+            <param name="Text">Строка поиска (может быть пустой — тогда показываются самые подходящие).</param>
+            <param name="Loader">Загрузчик для модов (fabric/forge); для остальных типов игнорируется.</param>
+        </member>
+        <member name="P:Launcher.Core.Mods.ModSearchQuery.Text">
+            <summary>Строка поиска (может быть пустой — тогда показываются самые подходящие).</summary>
+        </member>
+        <member name="P:Launcher.Core.Mods.ModSearchQuery.Loader">
+            <summary>Загрузчик для модов (fabric/forge); для остальных типов игнорируется.</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.InstalledMod">
+            <summary>Запись об установленном файле. Хранится в служебном файле профиля.</summary>
+            <param name="AutoInstalled">Поставлен как зависимость другого мода, а не по прямому выбору пользователя.</param>
+        </member>
+        <member name="M:Launcher.Core.Mods.InstalledMod.#ctor(System.String,System.String,System.String,Launcher.Core.Mods.ModContentType,System.String,System.String,System.String,System.Boolean,System.DateTimeOffset)">
+            <summary>Запись об установленном файле. Хранится в служебном файле профиля.</summary>
+            <param name="AutoInstalled">Поставлен как зависимость другого мода, а не по прямому выбору пользователя.</param>
+        </member>
+        <member name="P:Launcher.Core.Mods.InstalledMod.AutoInstalled">
+            <summary>Поставлен как зависимость другого мода, а не по прямому выбору пользователя.</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.ModUpdate">
+            <summary>Запись об обновлении, которое можно поставить.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModUpdate.#ctor(Launcher.Core.Mods.InstalledMod,Launcher.Core.Mods.ModVersion)">
+            <summary>Запись об обновлении, которое можно поставить.</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.ModRegistry">
+            <summary>
+            Список файлов, которые поставил лаунчер, в служебном файле папки профиля. Файлы, положенные вручную, лаунчер не трогает:
+            он знает только то, что записал сам.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.ModrinthParser">
+            <summary>Разбор ответов Modrinth. Лишние и отсутствующие необязательные поля не считаются ошибкой.</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModrinthParser.PickFile(System.Text.Json.JsonElement)">
+            <summary>Основной файл версии; если ни один не помечен основным, берётся первый (так сказано в документации Modrinth).</summary>
+        </member>
+        <member name="M:Launcher.Core.Mods.ModVersionSelector.PickBest(System.Collections.Generic.IEnumerable{Launcher.Core.Mods.ModVersion})">
+            <summary>Лучшая версия: свежий релиз, а если релизов нет — свежая бета, затем альфа.</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.RecommendedItem">
+            <param name="Slug">Короткое имя проекта на Modrinth. Если проекта с таким именем нет, запись молча пропускается.</param>
+            <param name="Loaders">Для каких загрузчиков рекомендуется; null — для любых (ресурспаки, шейдеры).</param>
+        </member>
+        <member name="M:Launcher.Core.Mods.RecommendedItem.#ctor(System.String,Launcher.Core.Mods.ModContentType,Launcher.Core.Versions.LoaderKind[],System.String)">
+            <param name="Slug">Короткое имя проекта на Modrinth. Если проекта с таким именем нет, запись молча пропускается.</param>
+            <param name="Loaders">Для каких загрузчиков рекомендуется; null — для любых (ресурспаки, шейдеры).</param>
+        </member>
+        <member name="P:Launcher.Core.Mods.RecommendedItem.Slug">
+            <summary>Короткое имя проекта на Modrinth. Если проекта с таким именем нет, запись молча пропускается.</summary>
+        </member>
+        <member name="P:Launcher.Core.Mods.RecommendedItem.Loaders">
+            <summary>Для каких загрузчиков рекомендуется; null — для любых (ресурспаки, шейдеры).</summary>
+        </member>
+        <member name="T:Launcher.Core.Mods.RecommendedContent">
+            <summary>Подборка «рекомендуем». Лежит в коде, чтобы работать без интернета; позже её можно подгружать с сайта автора.</summary>
+        </member>
+        <member name="T:Launcher.Core.NeoForge.NeoForgeInstaller">
+            <summary>
+            Установка NeoForge (Minecraft 1.20.2 и новее; для 1.20.1 — отдельная сборка net.neoforged:forge) официальным установщиком в режиме «--install-client»:
+            игра → установщик с maven.neoforged.net (проверка SHA-1, если репозиторий её публикует) → запуск установщика
+            нужной Java → проверка, что профиль версии появился и читается.
+            Установщик сам скачивает библиотеки и выполняет обработку (processors), поэтому установка может занять несколько минут.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeInstaller.InstallAsync(System.String,System.String,Launcher.Core.Installation.InstallOptions,System.IProgress{System.String},System.Threading.CancellationToken)">
+            <param name="neoForgeVersion">Версия NeoForge или null — последняя стабильная (если нет — последняя).</param>
+            <param name="status">Короткие сообщения о ходе установки.</param>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeInstaller.ReadVersionId(System.String,System.String)">
+            <summary>Идентификатор версии берётся из version.json внутри установщика — так он совпадёт с тем, что создаст сам установщик.</summary>
+        </member>
+        <member name="T:Launcher.Core.NeoForge.INeoForgeMetaClient">
+            <summary>Официальный Maven-репозиторий NeoForge: список версий и установщики.</summary>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.INeoForgeMetaClient.GetVersionsAsync(System.Threading.CancellationToken)">
+            <summary>Все версии NeoForge из maven-metadata.xml (от старых к новым), включая сборки для 1.20.1, если их список доступен.</summary>
+            <exception cref="T:Launcher.Core.Errors.NeoForgeException">Сервис недоступен или формат неожиданный.</exception>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.INeoForgeMetaClient.GetInstallerSha1Async(System.String,System.Threading.CancellationToken)">
+            <summary>SHA-1 установщика из Maven-репозитория (файл .sha1) или null, если репозиторий его не публикует.</summary>
+            <exception cref="T:Launcher.Core.Errors.NeoForgeException">Репозиторий недоступен.</exception>
+        </member>
+        <member name="T:Launcher.Core.NeoForge.NeoForgeVersions">
+            <summary>
+            Версии NeoForge и адреса установщиков.
+            Схема версий (по документации NeoForge): для Minecraft 1.A.B версия начинается с «A.B.» (1.21.1 → 21.1.x, 1.21 → 21.0.x);
+            для Minecraft 26.1 и новее — с полного номера Minecraft с «0» вместо отсутствующей третьей цифры (26.1 → 26.1.0.x).
+            Версия 1.20.1 устроена иначе: артефакт net.neoforged:forge, версии вида «1.20.1-47.1.106»
+            (список — по адресу <see cref="F:Launcher.Core.NeoForge.NeoForgeVersions.LegacyMetadataUri"/>). NeoForge сам рекомендует Forge для 1.20.1; поддержка здесь — по просьбе пользователя.
+            </summary>
+        </member>
+        <member name="F:Launcher.Core.NeoForge.NeoForgeVersions.LegacyMavenBase">
+            <summary>Артефакт net.neoforged:forge — сборки NeoForge для Minecraft 1.20.1.</summary>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.IsLegacy(System.String)">
+            <summary>Версия 1.20.1 («1.20.1-47.1.106») — из артефакта net.neoforged:forge.</summary>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.SafeVersion">
+            <remarks>
+            Pattern:<br/>
+            <code>^[0-9A-Za-z][0-9A-Za-z._\\-]{0,39}$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match an ASCII letter or digit.<br/>
+            ○ Match a character in the set [\-.0-9A-Z_a-z] atomically at most 39 times.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.OldGameVersion">
+            <remarks>
+            Pattern:<br/>
+            <code>^1\\.(?&lt;a&gt;\\d+)(?:\\.(?&lt;b&gt;\\d+))?$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match the string "1.".<br/>
+            ○ "a" capture group.<br/>
+                ○ Match a Unicode digit greedily at least once.<br/>
+            ○ Optional (greedy).<br/>
+                ○ Match '.'.<br/>
+                ○ "b" capture group.<br/>
+                    ○ Match a Unicode digit atomically at least once.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.NewGameVersion">
+            <remarks>
+            Pattern:<br/>
+            <code>^(?&lt;maj&gt;\\d+)\\.(?&lt;min&gt;\\d+)(?:\\.(?&lt;pat&gt;\\d+))?$</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ "maj" capture group.<br/>
+                ○ Match a Unicode digit atomically at least once.<br/>
+            ○ Match '.'.<br/>
+            ○ "min" capture group.<br/>
+                ○ Match a Unicode digit greedily at least once.<br/>
+            ○ Optional (greedy).<br/>
+                ○ Match '.'.<br/>
+                ○ "pat" capture group.<br/>
+                    ○ Match a Unicode digit atomically at least once.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.ParseMetadata(System.String)">
+            <exception cref="T:Launcher.Core.Errors.NeoForgeException">Формат неожиданный.</exception>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.Prefix(System.String)">
+            <summary>Начало версий NeoForge для версии Minecraft (с точкой на конце) или null, если версия не поддерживается.</summary>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.GameVersionOf(System.String)">
+            <summary>Версия Minecraft, для которой собрана версия NeoForge, или null, если схема не распознана.</summary>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.ForGame(System.Collections.Generic.IReadOnlyList{System.String},System.String)">
+            <summary>Версии для игры (по возрастанию).</summary>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.SupportedGames(System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>Игры, для которых есть сборки NeoForge.</summary>
+        </member>
+        <member name="M:Launcher.Core.NeoForge.NeoForgeVersions.Choose(System.Collections.Generic.IReadOnlyList{System.String},System.String,System.String)">
+            <summary>Явно заданная версия → последняя стабильная → последняя (в том числе beta).</summary>
+            <exception cref="T:Launcher.Core.Errors.NeoForgeException">Нет сборок для этой игры или версия записана некорректно.</exception>
+        </member>
+        <member name="T:Launcher.Core.Profiles.GameProfile">
+            <summary>Игровой профиль: какая версия запускается и с какими настройками.</summary>
+            <param name="Name">Имя профиля (используется как имя папки игры, поэтому набор символов ограничен).</param>
+            <param name="MaxMemoryMb">Максимальная память (-Xmx) в мегабайтах.</param>
+            <param name="MinMemoryMb">Начальная память (-Xms) в мегабайтах или null.</param>
+            <param name="JvmArguments">Дополнительные аргументы JVM одной строкой (значения с пробелами — в кавычках).</param>
+            <param name="GameArguments">Дополнительные аргументы игры одной строкой.</param>
+            <param name="JavaPath">Путь к Java только для этого профиля или null.</param>
+            <param name="Icon">Имя файла значка из папки icons лаунчера или null — без значка.</param>
+            <param name="GarbageCollector">Идентификатор сборщика мусора (<see cref="T:Launcher.Core.GameLaunch.GarbageCollectors"/>) или null — по умолчанию.</param>
+        </member>
+        <member name="M:Launcher.Core.Profiles.GameProfile.#ctor(System.String,System.String,System.Int32,System.Nullable{System.Int32},System.String,System.String,System.String,System.String,System.String)">
+            <summary>Игровой профиль: какая версия запускается и с какими настройками.</summary>
+            <param name="Name">Имя профиля (используется как имя папки игры, поэтому набор символов ограничен).</param>
+            <param name="MaxMemoryMb">Максимальная память (-Xmx) в мегабайтах.</param>
+            <param name="MinMemoryMb">Начальная память (-Xms) в мегабайтах или null.</param>
+            <param name="JvmArguments">Дополнительные аргументы JVM одной строкой (значения с пробелами — в кавычках).</param>
+            <param name="GameArguments">Дополнительные аргументы игры одной строкой.</param>
+            <param name="JavaPath">Путь к Java только для этого профиля или null.</param>
+            <param name="Icon">Имя файла значка из папки icons лаунчера или null — без значка.</param>
+            <param name="GarbageCollector">Идентификатор сборщика мусора (<see cref="T:Launcher.Core.GameLaunch.GarbageCollectors"/>) или null — по умолчанию.</param>
+        </member>
+        <member name="P:Launcher.Core.Profiles.GameProfile.Name">
+            <summary>Имя профиля (используется как имя папки игры, поэтому набор символов ограничен).</summary>
+        </member>
+        <member name="P:Launcher.Core.Profiles.GameProfile.MaxMemoryMb">
+            <summary>Максимальная память (-Xmx) в мегабайтах.</summary>
+        </member>
+        <member name="P:Launcher.Core.Profiles.GameProfile.MinMemoryMb">
+            <summary>Начальная память (-Xms) в мегабайтах или null.</summary>
+        </member>
+        <member name="P:Launcher.Core.Profiles.GameProfile.JvmArguments">
+            <summary>Дополнительные аргументы JVM одной строкой (значения с пробелами — в кавычках).</summary>
+        </member>
+        <member name="P:Launcher.Core.Profiles.GameProfile.GameArguments">
+            <summary>Дополнительные аргументы игры одной строкой.</summary>
+        </member>
+        <member name="P:Launcher.Core.Profiles.GameProfile.JavaPath">
+            <summary>Путь к Java только для этого профиля или null.</summary>
+        </member>
+        <member name="P:Launcher.Core.Profiles.GameProfile.GarbageCollector">
+            <summary>Идентификатор сборщика мусора (<see cref="T:Launcher.Core.GameLaunch.GarbageCollectors"/>) или null — по умолчанию.</summary>
+        </member>
+        <member name="P:Launcher.Core.Profiles.GameProfile.Icon">
+            <summary>Имя файла значка из папки icons лаунчера или null — без значка.</summary>
+        </member>
+        <member name="F:Launcher.Core.Profiles.GameProfile.MaxAllowedMemoryMb">
+            <summary>Верхняя граница — лишь защита от опечатки (16 ТБ). Реальный предел задаёт компьютер, поэтому лаунчер только предупреждает.</summary>
+        </member>
+        <member name="M:Launcher.Core.Profiles.GameProfile.Validate">
+            <exception cref="T:Launcher.Core.Errors.ProfileException">Данные профиля некорректны.</exception>
+        </member>
+        <member name="T:Launcher.Core.Profiles.IProfileStore">
+            <summary>Хранилище игровых профилей. Имена профилей не зависят от регистра.</summary>
+        </member>
+        <member name="M:Launcher.Core.Profiles.IProfileStore.SaveAsync(Launcher.Core.Profiles.GameProfile,System.Threading.CancellationToken)">
+            <summary>Создаёт профиль или заменяет существующий с тем же именем. Данные проверяются.</summary>
+        </member>
+        <member name="M:Launcher.Core.Profiles.IProfileStore.DeleteAsync(System.String,System.Threading.CancellationToken)">
+            <returns>true, если профиль существовал. Файлы игры профиля не удаляются.</returns>
+        </member>
+        <member name="T:Launcher.Core.Quilt.QuiltInstaller">
+            <summary>
+            Установка Quilt: базовая версия Minecraft → профиль запуска Quilt с официального сервиса → библиотеки загрузчика.
+            Профиль записывается последним: если загрузка оборвалась, «наполовину установленной» версии не появляется.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Quilt.QuiltInstaller.InstallAsync(System.String,System.String,Launcher.Core.Installation.InstallOptions,System.IProgress{Launcher.Core.Installation.InstallProgress},System.Threading.CancellationToken)">
+            <param name="loaderVersion">Версия загрузчика или null — последняя стабильная.</param>
+        </member>
+        <member name="M:Launcher.Core.Quilt.QuiltInstaller.Compare(System.String,System.String)">
+            <summary>Сравнение «0.26.0» / «0.20.0-beta.9»: сначала числа до дефиса, при равенстве предварительная сборка старше релиза.</summary>
+        </member>
+        <member name="T:Launcher.Core.Quilt.QuiltLoaderVersion">
+            <summary>Версия загрузчика Quilt Loader из официального сервиса meta.quiltmc.org.</summary>
+        </member>
+        <member name="M:Launcher.Core.Quilt.QuiltLoaderVersion.#ctor(System.String,System.Boolean)">
+            <summary>Версия загрузчика Quilt Loader из официального сервиса meta.quiltmc.org.</summary>
+        </member>
+        <member name="T:Launcher.Core.Quilt.IQuiltMetaClient">
+            <summary>Доступ к официальному сервису метаданных Quilt (https://meta.quiltmc.org).</summary>
+        </member>
+        <member name="M:Launcher.Core.Quilt.IQuiltMetaClient.GetLoaderVersionsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Версии загрузчика для версии игры, от новых к старым (порядок сервиса). Пустой список — версия игры не поддерживается.</summary>
+            <exception cref="T:Launcher.Core.Errors.QuiltException">Сервис недоступен или ответил неожиданно.</exception>
+        </member>
+        <member name="M:Launcher.Core.Quilt.IQuiltMetaClient.GetProfileJsonAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>JSON профиля запуска (то, что кладётся в versions/{id}/{id}.json).</summary>
+            <exception cref="T:Launcher.Core.Errors.QuiltException">Сервис недоступен или ответил неожиданно.</exception>
+        </member>
+        <member name="T:Launcher.Core.Quilt.QuiltMetaParser">
+            <summary>Разбор списка версий загрузчика: [ { "loader": { "version": "0.26.0" }, ... }, ... ].</summary>
+        </member>
+        <member name="M:Launcher.Core.Quilt.QuiltMetaParser.ParseLoaders(System.String)">
+            <exception cref="T:Launcher.Core.Errors.QuiltException">Формат ответа не соответствует ожидаемому.</exception>
+        </member>
+        <member name="T:Launcher.Core.Skins.BbModelReader">
+            <summary>
+            Чтение модели Blockbench (.bbmodel — JSON). Формат Blockbench официально не описан («no complete specification»),
+            поэтому поддерживается только проверенное подмножество: кубики (<c>elements</c>) с <c>from</c>, <c>to</c>, <c>origin</c>, <c>rotation</c>,
+            <c>inflate</c>, гранями <c>faces.{north,east,south,west,up,down}.uv</c> (или <c>box_uv</c> + <c>uv_offset</c>), встроенная PNG-текстура и размер текстуры
+            (<c>resolution</c> или <c>uv_width/uv_height</c>). Повороты групп (<c>outliner</c>: origin, rotation, children) применяются; анимации и не-кубические элементы не учитываются — об этом
+            сообщается в <see cref="P:Launcher.Core.Skins.SkinModel.Notes"/>.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.BbModelReader.ReadFile(System.String)">
+            <exception cref="T:Launcher.Core.Errors.LauncherException">Файл не читается или не похож на модель Blockbench.</exception>
+        </member>
+        <member name="M:Launcher.Core.Skins.BbModelReader.ReadGroupChains(System.Text.Json.JsonElement)">
+            <summary>
+            Иерархия групп (<c>outliner</c>): у каждой группы <c>origin</c>, <c>rotation</c> и <c>children</c> (uuid кубиков или вложенные группы).
+            Для каждого кубика собирается цепочка поворотов от ближайшей группы к внешней; скрытые группы исключаются.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.BbModelWriter">
+            <summary>
+            Записывает стандартную модель игрока в файл Blockbench (.bbmodel): его можно открыть в Blockbench, изменить
+            и подключить обратно в «Настройки» → «Модель персонажа на главной». Формат Blockbench официально не описан;
+            используются поля, которые читает и сам лаунчер: cube, from/to, inflate, origin, uv_offset, faces.*.uv, встроенная текстура.
+            В Blockbench лицо модели смотрит на «north», поэтому координаты X и Z переворачиваются.
+            </summary>
+        </member>
+        <member name="F:Launcher.Core.Skins.BbModelWriter.TemplateName">
+            <summary>Имя модели в файле шаблона: по нему лаунчер понимает, что модель сделана из стандартной, и накладывает на неё выбранный скин.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.OptionsFile">
+            <summary>Правка строки resourcePacks в options.txt (список включённых ресурспаков). Остальные строки не затрагиваются.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.OptionsFile.TryEnable(System.String,System.String,System.String@)">
+            <summary>Включает ресурспак (в конец списка — это высший приоритет). false — строку не удалось разобрать, текст не изменён.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.OptionsFile.TryDisable(System.String,System.String,System.String@)">
+            <summary>Выключает ресурспак. false — строку не удалось разобрать, текст не изменён.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.SkinDetect">
+            <summary>Определяет по пикселям скина, тонкие ли у него руки (Alex).</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinDetect.IsSlim(System.Byte[],System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            <paramref name="bgra"/> — пиксели по 4 байта (B, G, R, A). Для скина не 64×64 (в том числе старого 64×32) точно сказать нельзя — возвращается <paramref name="fallback"/>.
+            Скин с тонкими руками — когда эти участки полностью прозрачны (или целиком чёрные).
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.SkinImage">
+            <summary>Проверка файла скина без декодирования картинки: подпись PNG и размеры из заголовка.</summary>
+        </member>
+        <member name="F:Launcher.Core.Skins.SkinImage.MaxBytes">
+            <summary>Скины Minecraft — крошечные файлы; больший размер почти наверняка ошибка.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinImage.Validate(System.Byte[])">
+            <exception cref="T:Launcher.Core.Errors.LauncherException">Файл не похож на скин Minecraft.</exception>
+        </member>
+        <member name="T:Launcher.Core.Skins.SkinLibrary">
+            <summary>
+            Коллекция сохранённых скинов (как «Скины» в официальном лаунчере): PNG-файлы в папке и список <c>library.json</c>.
+            Скины лежат у пользователя на диске и никуда не отправляются, пока он сам не применит один из них к аккаунту.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinLibrary.AddAsync(System.String,System.Byte[],System.Boolean,System.Threading.CancellationToken)">
+            <exception cref="T:Launcher.Core.Errors.LauncherException">Файл не подходит как скин или коллекция переполнена.</exception>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinLibrary.CleanName(System.String)">
+            <summary>Имя без служебных символов, не длиннее 32 знаков; пустое заменяется на «Скин».</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinLibrary.IsSafeId(System.String)">
+            <summary>Идентификатор — 32 шестнадцатеричных знака: так по нему нельзя выйти за пределы папки.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.SkinPart2D">
+            <summary>Один фрагмент двухмерного вида спереди: откуда взять из скина и куда поставить на картинке 16×32.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinPart2D.#ctor(Launcher.Core.Skins.UvRect,System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <summary>Один фрагмент двухмерного вида спереди: откуда взять из скина и куда поставить на картинке 16×32.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.Skin2D">
+            <summary>Вид персонажа спереди (как на плитках скинов в официальном лаунчере), собранный из частей скина.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.Skin2D.FrontParts(System.Boolean,System.Boolean)">
+            <summary>Части в порядке рисования: сначала тело, затем второй слой.</summary>
+        </member>
+        <member name="P:Launcher.Core.Skins.Skin2D.HeadSources">
+            <summary>Лицо и шапка (8×8 пикселей) для маленького значка.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.CubeFace">
+            <summary>Грань кубика. Оси: X — вправо от зрителя, Y — вверх, Z — к зрителю. North = −Z (спина игрока), South = +Z (лицо).</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.UvRect">
+            <summary>Прямоугольник текстуры в пикселях: (X1,Y1) — левый верхний угол картинки грани, (X2,Y2) — правый нижний. Если X1 &gt; X2, картинка отражена.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.UvRect.#ctor(System.Double,System.Double,System.Double,System.Double)">
+            <summary>Прямоугольник текстуры в пикселях: (X1,Y1) — левый верхний угол картинки грани, (X2,Y2) — правый нижний. Если X1 &gt; X2, картинка отражена.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.ModelCube">
+            <param name="From">Минимальный угол, в пикселях модели.</param>
+            <param name="To">Максимальный угол.</param>
+            <param name="Origin">Точка, вокруг которой применяется <paramref name="Rotation"/> (градусы по X, Y, Z).</param>
+        </member>
+        <member name="M:Launcher.Core.Skins.ModelCube.#ctor(System.String,Launcher.Core.Skins.Vec3,Launcher.Core.Skins.Vec3,Launcher.Core.Skins.Vec3,Launcher.Core.Skins.Vec3,System.Collections.Generic.IReadOnlyDictionary{Launcher.Core.Skins.CubeFace,Launcher.Core.Skins.UvRect},System.Collections.Generic.IReadOnlyList{Launcher.Core.Skins.GroupTransform})">
+            <param name="From">Минимальный угол, в пикселях модели.</param>
+            <param name="To">Максимальный угол.</param>
+            <param name="Origin">Точка, вокруг которой применяется <paramref name="Rotation"/> (градусы по X, Y, Z).</param>
+        </member>
+        <member name="P:Launcher.Core.Skins.ModelCube.From">
+            <summary>Минимальный угол, в пикселях модели.</summary>
+        </member>
+        <member name="P:Launcher.Core.Skins.ModelCube.To">
+            <summary>Максимальный угол.</summary>
+        </member>
+        <member name="P:Launcher.Core.Skins.ModelCube.Origin">
+            <summary>Точка, вокруг которой применяется <paramref name="Rotation"/> (градусы по X, Y, Z).</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.GroupTransform">
+            <summary>Поворот группы Blockbench вокруг её точки; применяется к кубикам внутри (от ближайшей группы к внешней).</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.GroupTransform.#ctor(Launcher.Core.Skins.Vec3,Launcher.Core.Skins.Vec3)">
+            <summary>Поворот группы Blockbench вокруг её точки; применяется к кубикам внутри (от ближайшей группы к внешней).</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.SkinModel">
+            <summary>Модель из кубиков и размер текстуры, к которому относятся координаты UV.</summary>
+            <param name="EmbeddedTexture">PNG, встроенный в файл модели (если есть); иначе показывается скин.</param>
+            <param name="FaceTowardsViewer">Какой гранью модель повёрнута к зрителю в начальном положении.</param>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinModel.#ctor(System.Collections.Generic.IReadOnlyList{Launcher.Core.Skins.ModelCube},System.Double,System.Double,System.Byte[],System.Collections.Generic.IReadOnlyList{System.String},Launcher.Core.Skins.CubeFace,System.String)">
+            <summary>Модель из кубиков и размер текстуры, к которому относятся координаты UV.</summary>
+            <param name="EmbeddedTexture">PNG, встроенный в файл модели (если есть); иначе показывается скин.</param>
+            <param name="FaceTowardsViewer">Какой гранью модель повёрнута к зрителю в начальном положении.</param>
+        </member>
+        <member name="P:Launcher.Core.Skins.SkinModel.EmbeddedTexture">
+            <summary>PNG, встроенный в файл модели (если есть); иначе показывается скин.</summary>
+        </member>
+        <member name="P:Launcher.Core.Skins.SkinModel.FaceTowardsViewer">
+            <summary>Какой гранью модель повёрнута к зрителю в начальном положении.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.ModelQuad">
+            <summary>Четырёхугольник для отрисовки: 4 вершины (по часовой от левого верхнего угла картинки грани — против часовой при взгляде снаружи) и UV 0..1.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.ModelQuad.#ctor(Launcher.Core.Skins.Vec3[],System.ValueTuple{System.Double,System.Double}[],Launcher.Core.Skins.Vec3)">
+            <summary>Четырёхугольник для отрисовки: 4 вершины (по часовой от левого верхнего угла картинки грани — против часовой при взгляде снаружи) и UV 0..1.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.PlayerPose">
+            <summary>Стандартная модель игрока (Steve / Alex) на основе раскладки скина 64×64 (или старого 64×32).</summary>
+            <summary>Поза стандартной модели: углы в градусах. По X: плюс — назад, минус — вперёд; по Z у рук: минус — правая рука (игрока) уходит вбок и вверх.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.PlayerPose.#ctor(System.String,System.String,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)">
+            <summary>Стандартная модель игрока (Steve / Alex) на основе раскладки скина 64×64 (или старого 64×32).</summary>
+            <summary>Поза стандартной модели: углы в градусах. По X: плюс — назад, минус — вперёд; по Z у рук: минус — правая рука (игрока) уходит вбок и вверх.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.PlayerPart">
+            <summary>Готовые позы, из которых выбирают в настройках.</summary>
+            <summary>Часть стандартной модели (см. <see cref="M:Launcher.Core.Skins.PlayerModel.Parts(System.Boolean,System.Boolean,System.Boolean)"/>).</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.PlayerPart.#ctor(System.String,Launcher.Core.Skins.Vec3,Launcher.Core.Skins.Vec3,System.Int32,System.Int32,System.Double)">
+            <summary>Готовые позы, из которых выбирают в настройках.</summary>
+            <summary>Часть стандартной модели (см. <see cref="M:Launcher.Core.Skins.PlayerModel.Parts(System.Boolean,System.Boolean,System.Boolean)"/>).</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.PlayerModel.Parts(System.Boolean,System.Boolean,System.Boolean)">
+            <summary>Части стандартной модели: размеры без увеличения, смещение в текстуре (U, V) и «раздутие» второго слоя.</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.PlayerModel.BlockbenchBoxUv(System.Double,System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Развёртка <c>box_uv</c> в Blockbench (сверено с исходным кодом Blockbench, <c>cube.js</c>, <c>updateUV</c>): лицо — «north», спина — «south»,
+            «east» — левый край развёртки; верх и низ перевёрнуты. У нашей стандартной модели лицо — «south», поэтому раскладки разные.
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.PlayerModel.BoxUv(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Стандартная раскладка развёртки кубика w×h×d в текстуре, начиная с (u, v) (как в скинах и Blockbench box UV).</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.PlayerModel.DefaultSkinBgra">
+            <summary>Картинка 64×64 (BGRA) для случая, когда своего скина нет: простой «человечек» с лицом.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.ModelGeometry">
+            <summary>Построение четырёхугольников из кубиков модели (без привязки к WPF — проверяется тестами).</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.ModelGeometry.Rotate(Launcher.Core.Skins.Vec3,Launcher.Core.Skins.Vec3,Launcher.Core.Skins.Vec3)">
+            <summary>Поворот вокруг точки: сначала по X, затем по Y, затем по Z (градусы).</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.SkinPackBuilder">
+            <summary>
+            Собирает ресурспак, который подменяет стандартные скины игроков (Steve, Alex и остальные) картинкой пользователя.
+            В одиночной игре и в режиме разработки у игрока нет скина от Mojang, поэтому игра берёт один из стандартных —
+            а ресурспак заменяет их все. Другие игроки на сервере такой скин не увидят.
+            </summary>
+        </member>
+        <member name="P:Launcher.Core.Skins.SkinPackBuilder.TexturePaths">
+            <summary>Пути текстур, которые нужно заменить (старые версии и версии 1.19.3+).</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.ResourcePackFormat">
+            <summary>Номер формата ресурспака для версии игры (по справочнику minecraft.wiki; для более новых версий — последний известный).</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.ResourcePackFormat.IsSupported(System.String)">
+            <summary>Подмена скина рассчитана на версии 1.13 и новее (в старых другой формат options.txt и ресурсов).</summary>
+        </member>
+        <member name="F:Launcher.Core.Skins.SkinApplyResult.Applied">
+            <summary>Скин подключён к профилю.</summary>
+        </member>
+        <member name="F:Launcher.Core.Skins.SkinApplyResult.Removed">
+            <summary>Скин отключён (его нет или вход выполнен в настоящий аккаунт).</summary>
+        </member>
+        <member name="F:Launcher.Core.Skins.SkinApplyResult.Unsupported">
+            <summary>Версия игры слишком старая: подмена не поддерживается.</summary>
+        </member>
+        <member name="F:Launcher.Core.Skins.SkinApplyResult.Failed">
+            <summary>Не удалось записать файлы профиля; запуск игры это не блокирует.</summary>
+        </member>
+        <member name="T:Launcher.Core.Skins.SkinService">
+            <summary>Хранит скин пользователя и подключает его к профилям как ресурспак (для одиночной игры и режима разработки).</summary>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinService.SetSkinAsync(System.Byte[],System.Threading.CancellationToken)">
+            <exception cref="T:Launcher.Core.Errors.LauncherException">Файл не подходит как скин.</exception>
+        </member>
+        <member name="M:Launcher.Core.Skins.SkinService.ApplyAsync(System.String,System.String,System.Boolean,System.Threading.CancellationToken)">
+            <param name="enable">true — подключить скин (нужен для режима разработки); false — убрать из профиля.</param>
+        </member>
+        <member name="T:Launcher.Core.Versions.ManifestSource">
+            <summary>Откуда на самом деле получен манифест.</summary>
+        </member>
+        <member name="F:Launcher.Core.Versions.ManifestSource.Network">
+            <summary>Свежие данные с сервера Mojang.</summary>
+        </member>
+        <member name="F:Launcher.Core.Versions.ManifestSource.FreshCache">
+            <summary>Локальный кэш, срок годности которого ещё не истёк.</summary>
+        </member>
+        <member name="F:Launcher.Core.Versions.ManifestSource.StaleCache">
+            <summary>Устаревший локальный кэш: сервер недоступен.</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.ManifestResult">
+            <summary>Результат получения манифеста с информацией об источнике.</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.ManifestResult.#ctor(Launcher.Core.Versions.VersionManifest,Launcher.Core.Versions.ManifestSource,System.DateTimeOffset)">
+            <summary>Результат получения манифеста с информацией об источнике.</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.IVersionManifestProvider">
+            <summary>Источник манифеста версий. Интерфейс позволяет подменять сеть в тестах.</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.IVersionManifestProvider.GetManifestAsync(System.Boolean,System.Threading.CancellationToken)">
+            <param name="forceRefresh">true — игнорировать срок годности кэша и пробовать сеть.</param>
+            <exception cref="T:Launcher.Core.Errors.ManifestUnavailableException">Нет сети и нет локальной копии.</exception>
+        </member>
+        <member name="T:Launcher.Core.Versions.DownloadInfo">
+            <summary>Файл для скачивания из JSON версии (client, artifact, classifier).</summary>
+            <param name="Path">Относительный путь (есть у библиотек), иначе null.</param>
+            <param name="Url">Адрес файла. null у файлов, которые создаёт установщик (например, основной JAR Forge): скачивать их нельзя.</param>
+        </member>
+        <member name="M:Launcher.Core.Versions.DownloadInfo.#ctor(System.String,System.Uri,System.String,System.Nullable{System.Int64})">
+            <summary>Файл для скачивания из JSON версии (client, artifact, classifier).</summary>
+            <param name="Path">Относительный путь (есть у библиотек), иначе null.</param>
+            <param name="Url">Адрес файла. null у файлов, которые создаёт установщик (например, основной JAR Forge): скачивать их нельзя.</param>
+        </member>
+        <member name="P:Launcher.Core.Versions.DownloadInfo.Path">
+            <summary>Относительный путь (есть у библиотек), иначе null.</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.DownloadInfo.Url">
+            <summary>Адрес файла. null у файлов, которые создаёт установщик (например, основной JAR Forge): скачивать их нельзя.</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.AssetIndexInfo">
+            <summary>Индекс ресурсов (assets) версии.</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.AssetIndexInfo.#ctor(System.String,System.Uri,System.String,System.Nullable{System.Int64})">
+            <summary>Индекс ресурсов (assets) версии.</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.LibraryRule">
+            <summary>Одно правило применимости библиотеки.</summary>
+            <param name="HasFeatures">Правило зависит от «features» (для библиотек не применяется — считаем несовпадающим).</param>
+        </member>
+        <member name="M:Launcher.Core.Versions.LibraryRule.#ctor(System.Boolean,System.String,System.String,System.String,System.Boolean)">
+            <summary>Одно правило применимости библиотеки.</summary>
+            <param name="HasFeatures">Правило зависит от «features» (для библиотек не применяется — считаем несовпадающим).</param>
+        </member>
+        <member name="P:Launcher.Core.Versions.LibraryRule.HasFeatures">
+            <summary>Правило зависит от «features» (для библиотек не применяется — считаем несовпадающим).</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.Library">
+            <summary>Библиотека из JSON версии.</summary>
+            <param name="Classifiers">Дополнительные файлы по классификаторам (в основном старые natives).</param>
+            <param name="Natives">Соответствие «ОС → классификатор» (только старые версии).</param>
+            <param name="ExtractExclude">Что не распаковывать из natives-архива.</param>
+        </member>
+        <member name="M:Launcher.Core.Versions.Library.#ctor(System.String,Launcher.Core.Versions.DownloadInfo,System.Collections.Generic.IReadOnlyDictionary{System.String,Launcher.Core.Versions.DownloadInfo},System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{Launcher.Core.Versions.LibraryRule})">
+            <summary>Библиотека из JSON версии.</summary>
+            <param name="Classifiers">Дополнительные файлы по классификаторам (в основном старые natives).</param>
+            <param name="Natives">Соответствие «ОС → классификатор» (только старые версии).</param>
+            <param name="ExtractExclude">Что не распаковывать из natives-архива.</param>
+        </member>
+        <member name="P:Launcher.Core.Versions.Library.Classifiers">
+            <summary>Дополнительные файлы по классификаторам (в основном старые natives).</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.Library.Natives">
+            <summary>Соответствие «ОС → классификатор» (только старые версии).</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.Library.ExtractExclude">
+            <summary>Что не распаковывать из natives-архива.</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.LoggingConfigInfo">
+            <summary>Конфигурация логирования клиента (log4j). Для версий 1.7–1.18.1 её подключение закрывает уязвимость Log4Shell.</summary>
+            <param name="Argument">Шаблон JVM-аргумента; "${path}" заменяется путём к файлу.</param>
+        </member>
+        <member name="M:Launcher.Core.Versions.LoggingConfigInfo.#ctor(System.String,System.String,System.Uri,System.String,System.Nullable{System.Int64})">
+            <summary>Конфигурация логирования клиента (log4j). Для версий 1.7–1.18.1 её подключение закрывает уязвимость Log4Shell.</summary>
+            <param name="Argument">Шаблон JVM-аргумента; "${path}" заменяется путём к файлу.</param>
+        </member>
+        <member name="P:Launcher.Core.Versions.LoggingConfigInfo.Argument">
+            <summary>Шаблон JVM-аргумента; "${path}" заменяется путём к файлу.</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionDetails">
+            <summary>Разобранный JSON конкретной версии Minecraft (то, что нужно для установки).</summary>
+            <param name="RawJson">Исходный JSON — понадобится при запуске для разбора аргументов.</param>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionDetails.#ctor(System.String,System.String,System.String,System.String,Launcher.Core.Versions.AssetIndexInfo,Launcher.Core.Versions.DownloadInfo,System.Nullable{System.Int32},System.Collections.Generic.IReadOnlyList{Launcher.Core.Versions.Library},System.String,Launcher.Core.Versions.LoggingConfigInfo,System.Collections.Generic.IReadOnlyList{System.String},System.String)">
+            <summary>Разобранный JSON конкретной версии Minecraft (то, что нужно для установки).</summary>
+            <param name="RawJson">Исходный JSON — понадобится при запуске для разбора аргументов.</param>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionDetails.RawJson">
+            <summary>Исходный JSON — понадобится при запуске для разбора аргументов.</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionDetails.ClientJarId">
+            <summary>Идентификатор версии, чей client.jar попадает в classpath (для Fabric/Forge — базовая версия Minecraft).</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionDetails.AllRawJson">
+            <summary>JSON всей цепочки наследования: от базовой версии к самой версии.</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionOverlay">
+            <summary>
+            Версия, которая дополняет базовую (поле inheritsFrom): профили Fabric и Forge.
+            В ней нет assetIndex и downloads — их берут у базовой версии.
+            <c>UsesOwnJar</c> (поле waundboxCustomJar в JSON): в classpath идёт jar самой версии, а не базовой (своя версия из jar-файла).
+            </summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionOverlay.#ctor(System.String,System.String,System.String,System.String,System.Nullable{System.Int32},System.Collections.Generic.IReadOnlyList{Launcher.Core.Versions.Library},System.String,Launcher.Core.Versions.LoggingConfigInfo,System.Boolean)">
+            <summary>
+            Версия, которая дополняет базовую (поле inheritsFrom): профили Fabric и Forge.
+            В ней нет assetIndex и downloads — их берут у базовой версии.
+            <c>UsesOwnJar</c> (поле waundboxCustomJar в JSON): в classpath идёт jar самой версии, а не базовой (своя версия из jar-файла).
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionDetailsParser">
+            <summary>Разбор JSON конкретной версии (адрес берётся из манифеста версий).</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionDetailsParser.Parse(System.String)">
+            <exception cref="T:Launcher.Core.Errors.VersionMetadataException">JSON повреждён или в нём нет обязательных данных.</exception>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionDetailsParser.ParseOverlay(System.String)">
+            <summary>
+            Разбор версии, дополняющей базовую (Fabric/Forge): assetIndex и downloads не нужны.
+            </summary>
+            <exception cref="T:Launcher.Core.Errors.VersionMetadataException">JSON повреждён или нет обязательных полей.</exception>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionDetailsParser.OptionalUrl(System.Text.Json.JsonElement,System.String)">
+            <summary>Пустой или отсутствующий адрес допустим (файл создаёт установщик); непустой обязан быть корректным http(s).</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionLabel">
+            <summary>Что скрывается за идентификатором версии профиля: чистая игра, Fabric, Quilt, Forge или NeoForge.</summary>
+            <param name="LoaderVersion">Версия загрузчика (для Vanilla — null).</param>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionLabel.#ctor(Launcher.Core.Versions.LoaderKind,System.String,System.String)">
+            <summary>Что скрывается за идентификатором версии профиля: чистая игра, Fabric, Quilt, Forge или NeoForge.</summary>
+            <param name="LoaderVersion">Версия загрузчика (для Vanilla — null).</param>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionLabel.LoaderVersion">
+            <summary>Версия загрузчика (для Vanilla — null).</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionLabel.Parse(System.String)">
+            <summary>Разбирает идентификаторы вида "1.21.1", "fabric-loader-0.19.5-1.21.1", "1.21.1-forge-52.1.0", "neoforge-21.1.172".</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionLabel.Display">
+            <summary>Короткая подпись для интерфейса: "Fabric 1.21.1".</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionEntry">
+            <summary>Одна запись из version_manifest_v2.json.</summary>
+            <param name="Id">Идентификатор версии, например "1.21.1".</param>
+            <param name="Type">Разобранный тип версии.</param>
+            <param name="RawType">Тип в исходном виде (сохраняем, чтобы не терять неизвестные типы).</param>
+            <param name="Url">Адрес JSON этой версии (берётся из метаданных, не угадывается).</param>
+            <param name="Sha1">SHA-1 JSON версии, если указан.</param>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionEntry.#ctor(System.String,Launcher.Core.Versions.VersionType,System.String,System.Uri,System.DateTimeOffset,System.DateTimeOffset,System.String)">
+            <summary>Одна запись из version_manifest_v2.json.</summary>
+            <param name="Id">Идентификатор версии, например "1.21.1".</param>
+            <param name="Type">Разобранный тип версии.</param>
+            <param name="RawType">Тип в исходном виде (сохраняем, чтобы не терять неизвестные типы).</param>
+            <param name="Url">Адрес JSON этой версии (берётся из метаданных, не угадывается).</param>
+            <param name="Sha1">SHA-1 JSON версии, если указан.</param>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionEntry.Id">
+            <summary>Идентификатор версии, например "1.21.1".</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionEntry.Type">
+            <summary>Разобранный тип версии.</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionEntry.RawType">
+            <summary>Тип в исходном виде (сохраняем, чтобы не терять неизвестные типы).</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionEntry.Url">
+            <summary>Адрес JSON этой версии (берётся из метаданных, не угадывается).</summary>
+        </member>
+        <member name="P:Launcher.Core.Versions.VersionEntry.Sha1">
+            <summary>SHA-1 JSON версии, если указан.</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionManifest">
+            <summary>Манифест версий Minecraft.</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionManifest.#ctor(System.String,System.String,System.Collections.Generic.IReadOnlyList{Launcher.Core.Versions.VersionEntry})">
+            <summary>Манифест версий Minecraft.</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionManifest.Find(System.String)">
+            <summary>Ищет версию по идентификатору (регистр важен). Возвращает null, если её нет.</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionManifest.OfType(System.Nullable{Launcher.Core.Versions.VersionType})">
+            <summary>Возвращает версии заданного типа или все, если тип не указан. Порядок сохраняется (новые первыми).</summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionManifestParser">
+            <summary>Разбор JSON манифеста версий (формат version_manifest_v2.json).</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionManifestParser.Parse(System.String)">
+            <exception cref="T:Launcher.Core.Errors.ManifestFormatException">JSON повреждён или не содержит обязательных полей.</exception>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionMerger">
+            <summary>Объединяет версию-дополнение (Fabric/Forge) с базовой версией Minecraft.</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionMerger.Merge(Launcher.Core.Versions.VersionDetails,Launcher.Core.Versions.VersionOverlay)">
+            <summary>
+            Идентификатор, главный класс и тип берутся у дополнения; ресурсы, клиент и Java — у базовой версии
+            (если дополнение не задаёт свою Java). Библиотеки дополнения идут первыми и заменяют одноимённые
+            библиотеки базовой версии (сравнение без учёта версии). Аргументы запуска складываются: сначала базовые, затем дополнения.
+            </summary>
+        </member>
+        <member name="T:Launcher.Core.Versions.VersionType">
+            <summary>Тип версии Minecraft по официальным метаданным.</summary>
+        </member>
+        <member name="F:Launcher.Core.Versions.VersionType.Unknown">
+            <summary>Тип, которого лаунчер ещё не знает (метаданные могут расширяться).</summary>
+        </member>
+        <member name="M:Launcher.Core.Versions.VersionTypeParser.Parse(System.String)">
+            <summary>Преобразует строку из манифеста ("release", "snapshot", "old_beta", "old_alpha").</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SafeVersion_0">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the SafeVersion method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.SafeVersion_0.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeVersion_0.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SafeVersion_0.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeVersion_0.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SafeVersion_0.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeVersion_0.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeVersion_0.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeVersion_0.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SafeFolder_1">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the SafeFolder method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.SafeFolder_1.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeFolder_1.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SafeFolder_1.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeFolder_1.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.SafeFolder_1.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeFolder_1.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeFolder_1.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.SafeFolder_1.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.Sha1Pattern_2">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the Sha1Pattern method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Sha1Pattern_2.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Sha1Pattern_2.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.Sha1Pattern_2.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Sha1Pattern_2.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.Sha1Pattern_2.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Sha1Pattern_2.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Sha1Pattern_2.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Sha1Pattern_2.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.OldGameVersion_3">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the OldGameVersion method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.OldGameVersion_3.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.OldGameVersion_3.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.OldGameVersion_3.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.OldGameVersion_3.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.OldGameVersion_3.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.OldGameVersion_3.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.OldGameVersion_3.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.OldGameVersion_3.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NewGameVersion_4">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the NewGameVersion method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.NewGameVersion_4.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NewGameVersion_4.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NewGameVersion_4.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NewGameVersion_4.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.NewGameVersion_4.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NewGameVersion_4.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NewGameVersion_4.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.NewGameVersion_4.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.Utilities">
+            <summary>Helper methods used by generated <see cref="T:System.Text.RegularExpressions.Regex"/>-derived implementations.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_defaultTimeout">
+            <summary>Default timeout value set in <see cref="T:System.AppContext"/>, or <see cref="F:System.Text.RegularExpressions.Regex.InfiniteMatchTimeout"/> if none was set.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_hasTimeout">
+            <summary>Whether <see cref="F:System.Text.RegularExpressions.Generated.Utilities.s_defaultTimeout"/> is non-infinite.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPush(System.Int32[]@,System.Int32@,System.Int32,System.Int32)">
+            <summary>Pushes 2 values onto the backtracking stack.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_asciiHexDigits">
+            <summary>Supports searching for characters in or not in "0123456789ABCDEFabcdef".</summary>
+        </member>
+    </members>
+</doc>

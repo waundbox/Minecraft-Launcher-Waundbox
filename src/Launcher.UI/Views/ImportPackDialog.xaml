@@ -1,0 +1,37 @@
+<UserControl x:Class="Launcher.UI.Views.ImportPackDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls"
+             xmlns:v="clr-namespace:Launcher.UI.Views">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,12,0">
+            <TextBlock Text="Импорт сборки" Style="{StaticResource Heading}" />
+            <TextBlock Text="{Binding PackName}" FontWeight="SemiBold" FontSize="15" Margin="0,10,0,0" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Summary}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"
+                       Visibility="{Binding HasSummary, Converter={StaticResource BoolToVis}}" />
+            <TextBlock Text="{Binding Details}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0" />
+
+            <TextBlock Text="Название профиля" Style="{StaticResource Muted}" Margin="0,16,0,8" />
+            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MaxLength="40" IsEnabled="{Binding IsNotBusy}" />
+
+            <v:MemoryPicker DataContext="{Binding Memory}" Margin="0,14,0,0"
+                            IsEnabled="{Binding DataContext.IsNotBusy, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+
+            <TextBlock Margin="0,14,0,0" Style="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap"
+                       Text="Лаунчер скачает игру, загрузчик и все файлы сборки (с проверкой контрольных сумм) и создаст отдельный профиль. Файлы берутся только с Modrinth, GitHub, GitLab и CurseForge." />
+
+            <StackPanel Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Margin="0,14,0,0">
+                <ProgressBar Value="{Binding Progress, Mode=OneWay}" Maximum="100" />
+                <TextBlock Text="{Binding StatusText}" Style="{StaticResource Muted}" Margin="0,8,0,0" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding Error}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" Margin="0,12,0,0"
+                       Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Style="{StaticResource GhostButton}" Content="Отмена" Margin="0,0,10,0" Command="{Binding CancelCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Content="Установить" Command="{Binding ImportCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

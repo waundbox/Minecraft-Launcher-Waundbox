@@ -1,0 +1,121 @@
+<UserControl x:Class="Launcher.UI.Views.ConsoleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls">
+    <Grid Margin="40,8,40,28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Логи" Style="{StaticResource Heading}" />
+                <TextBlock Text="{Binding SessionTitle}" Style="{StaticResource Muted}" Margin="0,4,0,0" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <TextBlock Text="Автопрокрутка" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <ToggleButton Style="{StaticResource SwitchToggle}" IsChecked="{Binding AutoScroll, Mode=TwoWay}" Margin="0,0,18,0" />
+                <Button Style="{StaticResource IconButton}" Content="&#xE8C8;" ToolTip="Копировать выделенное, а если ничего не выделено — все логи"
+                        Click="OnCopyButton" Margin="0,0,8,0" />
+                <Button Style="{StaticResource IconButton}" Content="&#xE8A5;" ToolTip="Открыть файл журнала"
+                        Command="{Binding OpenLogCommand}" Margin="0,0,8,0" />
+                <Button Style="{StaticResource IconButton}" Content="&#xE74D;" ToolTip="Очистить"
+                        Command="{Binding ClearCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Выбор игры: стрелка открывает список запущенных профилей (виден, когда сеансов больше одного) -->
+        <Grid Grid.Row="1" Margin="0,0,0,12" HorizontalAlignment="Left"
+              Visibility="{Binding HasSeveralSessions, Converter={StaticResource BoolToVis}}">
+            <Button x:Name="SessionButton" Style="{StaticResource GhostButton}" Padding="14,8" Click="OnSessionButtonClick">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="8" Height="8" Margin="0,1,10,0" Fill="{DynamicResource AccentBrush}" />
+                    <TextBlock Text="{Binding Current.Name}" MinWidth="120" />
+                    <TextBlock Style="{StaticResource Glyph}" Text="&#xE70D;" FontSize="11" Margin="12,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Popup x:Name="SessionPopup" PlacementTarget="{Binding ElementName=SessionButton}" Placement="Bottom"
+                   StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade" Closed="OnSessionPopupClosed">
+                <Border Style="{StaticResource Glass}" Margin="0,6,12,12" Padding="6" CornerRadius="14"
+                        MinWidth="{Binding ActualWidth, ElementName=SessionButton}" MaxHeight="320">
+                    <ListBox x:Name="SessionList" Style="{StaticResource PlainListBox}" ItemsSource="{Binding Sessions}"
+                             SelectedItem="{Binding Current, Mode=TwoWay}" SelectionChanged="OnSessionPicked">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="10,6">
+                                    <Ellipse x:Name="Dot" Width="8" Height="8" Margin="0,1,10,0" Fill="{DynamicResource MutedBrush}" />
+                                    <TextBlock Text="{Binding Name}" />
+                                </StackPanel>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsLive}" Value="True">
+                                        <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource AccentBrush}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </Popup>
+        </Grid>
+
+        <Border Grid.Row="2" Style="{StaticResource Glass}" Padding="6" CornerRadius="18">
+            <Grid>
+                <ListBox x:Name="Lines" Style="{StaticResource PlainListBox}" ItemsSource="{Binding Lines}"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         VirtualizingPanel.ScrollUnit="Item"
+                         SelectionMode="Extended" IsHitTestVisible="True" Loaded="OnLinesLoaded" Focusable="True"
+                         KeyDown="OnLinesKeyDown" SelectionChanged="OnLinesSelectionChanged">
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Копировать выделенное (Ctrl+C)" Click="OnCopySelected" />
+                            <MenuItem Header="Выделить всё (Ctrl+A)" Click="OnSelectAll" />
+                            <MenuItem Header="Копировать всё" Click="OnCopyAll" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <!-- Строки можно выделять мышью (Shift/Ctrl, протяжка) и копировать -->
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource PlainListBoxItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Row" Background="Transparent" CornerRadius="4">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Row" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock x:Name="Line" Text="{Binding Text}" FontFamily="Consolas, Cascadia Mono" FontSize="12.5"
+                                       Margin="12,1" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource TextBrush}" />
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsError}" Value="True">
+                                    <Setter TargetName="Line" Property="Foreground" Value="{DynamicResource DangerBrush}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsLauncher}" Value="True">
+                                    <Setter TargetName="Line" Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False"
+                            Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Style="{StaticResource Glyph}" Text="&#xE756;" FontSize="38" Foreground="{DynamicResource MutedBrush}"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Здесь появится вывод игры после запуска" Style="{StaticResource Muted}" Margin="0,12,0,0" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

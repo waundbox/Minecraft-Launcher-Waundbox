@@ -1,0 +1,26 @@
+<UserControl x:Class="Launcher.UI.Views.MemoryPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls">
+    <!-- DataContext: MemorySelection -->
+    <StackPanel>
+        <Grid>
+            <TextBlock Text="Память для игры" Style="{StaticResource Muted}" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding Summary}" HorizontalAlignment="Right" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </Grid>
+        <Slider Minimum="1024" Maximum="{Binding SliderMax, Mode=OneWay}" SmallChange="512" LargeChange="1024"
+                TickFrequency="512" IsSnapToTickEnabled="True" Value="{Binding SliderValue, Mode=TwoWay}" Margin="0,4,0,8" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" MaxLength="9" c:Ui.DigitsOnly="True"
+                     ToolTip="Объём памяти в мегабайтах (1 ГБ = 1024 МБ). Только цифры." />
+            <TextBlock Grid.Column="1" Text="МБ — можно вписать любое число" Style="{StaticResource Muted}" FontSize="12"
+                       Margin="10,0,0,0" VerticalAlignment="Center" />
+        </Grid>
+        <TextBlock Text="{Binding Warning}" Foreground="{DynamicResource WarnBrush}" TextWrapping="Wrap" FontSize="12.5" Margin="0,6,0,0"
+                   Visibility="{Binding HasWarning, Converter={StaticResource BoolToVis}}" />
+    </StackPanel>
+</UserControl>

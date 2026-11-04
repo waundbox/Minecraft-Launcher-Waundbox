@@ -1,0 +1,82 @@
+<UserControl x:Class="Launcher.UI.Views.NewProfileDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls"
+             xmlns:v="clr-namespace:Launcher.UI.Views">
+    <UserControl.Resources>
+        <Style x:Key="VersionItem" TargetType="ListBoxItem" BasedOn="{StaticResource ChipListBoxItem}">
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,12,0">
+            <Grid Margin="0,0,0,16">
+                <TextBlock Text="Новый профиль" Style="{StaticResource Heading}" VerticalAlignment="Center" />
+                <Button Style="{StaticResource IconButton}" Content="&#xE711;" ToolTip="Закрыть" HorizontalAlignment="Right"
+                        Command="{Binding CancelCommand}" />
+            </Grid>
+
+            <TextBlock Text="Что установить" Style="{StaticResource Muted}" Margin="0,0,0,8" />
+            <ListBox Style="{StaticResource ChipListBox}" ItemsSource="{Binding Loaders}"
+                     SelectedItem="{Binding SelectedLoader, Mode=TwoWay}" IsEnabled="{Binding IsNotBusy}">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel MinWidth="120">
+                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Hint}" Style="{StaticResource Muted}" FontSize="12" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <Grid Margin="0,8,0,8">
+                <TextBlock Text="Версия игры" Style="{StaticResource Muted}" VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Снапшоты" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <ToggleButton Style="{StaticResource SwitchToggle}" IsChecked="{Binding ShowSnapshots, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsNotBusy}" />
+                </StackPanel>
+            </Grid>
+            <TextBox Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsNotBusy}" Margin="0,0,0,8" />
+            <TextBlock Text="Загружаю список версий…" Style="{StaticResource Muted}" Margin="0,0,0,8"
+                       Visibility="{Binding IsLoadingVersions, Converter={StaticResource BoolToVis}}" />
+            <TextBlock Text="{Binding VersionsMessage}" Foreground="{DynamicResource WarnBrush}" TextWrapping="Wrap" Margin="0,0,0,8"
+                       Visibility="{Binding HasVersionsMessage, Converter={StaticResource BoolToVis}}" />
+            <ListBox Style="{StaticResource PlainListBox}" Height="150" ItemsSource="{Binding Versions}"
+                     SelectedItem="{Binding SelectedVersion, Mode=TwoWay}" ItemContainerStyle="{StaticResource VersionItem}"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto" IsEnabled="{Binding IsNotBusy}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <TextBlock Text="Название профиля" Style="{StaticResource Muted}" Margin="0,14,0,8" />
+            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MaxLength="40" IsEnabled="{Binding IsNotBusy}" />
+
+            <v:IconPicker DataContext="{Binding Icons}" Margin="0,14,0,0" />
+
+            <v:MemoryPicker DataContext="{Binding Memory}" IsEnabled="{Binding DataContext.IsNotBusy, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Margin="0,14,0,0" />
+
+            <StackPanel Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Margin="0,14,0,0">
+                <ProgressBar IsIndeterminate="{Binding IsIndeterminate}" Value="{Binding Progress, Mode=OneWay}" Maximum="100" />
+                <TextBlock Text="{Binding StatusText}" Style="{StaticResource Muted}" Margin="0,8,0,0" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding Error}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" Margin="0,12,0,0"
+                       Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Style="{StaticResource GhostButton}" Content="Отмена" Margin="0,0,10,0" Command="{Binding CancelCommand}" />
+                <Button Style="{StaticResource PrimaryButton}" Content="Создать и установить" Command="{Binding CreateCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
