@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Ядро лаунчера. Не зависит ни от UI, ни от Infrastructure, ни от внешних NuGet-пакетов. -->
+</Project>
