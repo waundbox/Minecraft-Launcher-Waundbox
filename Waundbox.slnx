@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/Launcher.Core/Launcher.Core.csproj" />
+  <Project Path="src/Launcher.Infrastructure/Launcher.Infrastructure.csproj" />
+  <Project Path="src/Launcher.Cli/Launcher.Cli.csproj" />
+  <Project Path="src/Launcher.UI/Launcher.UI.csproj" />
+  <Project Path="src/Launcher.Tests/Launcher.Tests.csproj" />
+</Solution>
