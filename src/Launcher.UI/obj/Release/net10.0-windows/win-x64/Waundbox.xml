@@ -1,0 +1,816 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Waundbox</name>
+    </assembly>
+    <members>
+        <member name="T:Launcher.UI.App">
+            <summary>
+            App
+            </summary>
+        </member>
+        <member name="P:Launcher.UI.App.AppliedFps">
+            <summary>Частота кадров анимаций: всегда 120.</summary>
+        </member>
+        <member name="M:Launcher.UI.App.AcquireSingleInstance(System.Boolean)">
+            <summary>Лаунчер должен быть запущен один раз: два экземпляра портили бы общие файлы профилей и настроек.</summary>
+        </member>
+        <member name="M:Launcher.UI.App.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.App.Main">
+            <summary>
+            Application Entry Point.
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.AppPower">
+            <summary>Состояние «лаунчер свёрнут»: тяжёлые элементы (3D-модель, дым) освобождают память и не рисуют кадры.</summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.ColorWheel">
+            <summary>
+            Круглая палитра: диск «оттенок + насыщенность» и полоса яркости под ним.
+            Значение — строка #RRGGBB (двусторонняя привязка). Клик или протяжка по диску/полосе меняют цвет сразу.
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.EditableElement">
+            <summary>
+            Обёртка элемента главной страницы для редактора интерфейса: применяет сохранённые положение, масштаб,
+            прозрачность, видимость и скругление; в режиме правки элемент можно перетаскивать мышью.
+            Что делает кнопка внутри, обёртка не меняет.
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.EditorGrid">
+            <summary>Сетка редактора интерфейса: видна в режиме правки, когда включена привязка к сетке.</summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.Motion">
+            <summary>
+            Общие настройки анимаций. Все анимации — только прозрачность и смещение/масштаб (их выполняет видеокарта,
+            пересчёта разметки нет). В экономном режиме анимации отключаются.
+            </summary>
+        </member>
+        <member name="P:Launcher.UI.Controls.Motion.Eco">
+            <summary>Экономный режим: включён в настройках или лаунчер простаивает (нет действий пользователя).</summary>
+        </member>
+        <member name="M:Launcher.UI.Controls.Motion.SetIdle(System.Boolean)">
+            <summary>Лаунчер простаивает: анимации и вращение модели приостанавливаются, как в экономном режиме.</summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.PageHost">
+            <summary>
+            Показывает текущую страницу и анимирует переходы: скольжение + затухание в сторону переключения.
+            Страницы создаются один раз и переиспользуются.
+            Анимируются только смещение и прозрачность; на время перехода страницы кэшируются как картинка.
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.SkinViewer">
+            <summary>
+            Трёхмерная модель игрока со скином. Вращается мышью (перетаскивание) и медленно сама, если не включён экономный режим.
+            Показывает стандартную модель (Steve/Alex) или модель из Blockbench (<see cref="P:Launcher.UI.Controls.SkinViewer.Model"/>).
+            <para>
+            Рисуется программно (без Viewport3D): каждый непрозрачный пиксель текстуры — маленький квадратик в пространстве, который
+            проецируется и закрашивается одним цветом. Так пиксель скина всегда лежит ровно там, где ему положено: нет буфера глубины WPF
+            (путал основной и второй слои), нет фильтрации текстур (мыло, светлые края), прозрачные пиксели просто не рисуются.
+            </para>
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.SkinViewer.Texel">
+            <summary>Один пиксель текстуры в пространстве: угол, два ребра, нормаль и цвет.</summary>
+        </member>
+        <member name="M:Launcher.UI.Controls.SkinViewer.OnPower">
+            <summary>Лаунчер свёрнут: останавливаем вращение и отдаём буферы картинки; при возврате перерисовываем.</summary>
+        </member>
+        <member name="M:Launcher.UI.Controls.SkinViewer.Sharpen">
+            <summary>Модель остановилась: перерисовываем в полном размере окна и сглаживаем при масштабировании (Fant).</summary>
+        </member>
+        <member name="P:Launcher.UI.Controls.SkinViewer.LastRenderMs">
+            <summary>Время последней отрисовки модели, мс (для вкладки разработчика).</summary>
+        </member>
+        <member name="P:Launcher.UI.Controls.SkinViewer.MaxGraphics">
+            <summary>Максимальная графика: модель всегда рисуется в полном размере окна, со сглаживанием.</summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.SmokeBackground">
+            <summary>
+            Фон «дым»: несколько мягких радиальных пятен, которые медленно плывут. Каждое пятно — отдельный элемент с
+            кэшем в виде картинки, поэтому движение — это перемещение готовой текстуры видеокартой, без перерисовки.
+            Анимацию можно ставить на паузу (<see cref="P:Launcher.UI.Controls.SmokeBackground.IsAnimated"/>), пауза не расходует процессор.
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Controls.SmokeBackground.ApplyTheme(System.Windows.Media.Color,System.Boolean,System.Windows.Media.Color)">
+            <summary>Подбирает фон и цвет «дыма» под тему и основной цвет.</summary>
+        </member>
+        <member name="M:Launcher.UI.Controls.SmokeBackground.OnPower">
+            <summary>Лаунчер свёрнут: пятна дыма удаляются целиком (и их кэш-картинки), при возврате создаются заново.</summary>
+        </member>
+        <member name="T:Launcher.UI.Controls.Ui">
+            <summary>Прикреплённые свойства, которые нужны стилям (скругление, «выбрано»).</summary>
+        </member>
+        <member name="F:Launcher.UI.Controls.Ui.DigitsOnlyProperty">
+            <summary>Поле ввода принимает только цифры (набор и вставка из буфера обмена).</summary>
+        </member>
+        <member name="T:Launcher.UI.Interop.WindowInterop">
+            <summary>Мелкие возможности Windows 11: скруглённые углы окна и тёмный заголовок. На Windows 10 вызовы безвредно игнорируются.</summary>
+        </member>
+        <member name="T:Launcher.UI.MainWindow">
+            <summary>
+            MainWindow
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.MainWindow.ApplyTopScale">
+            <summary>Верхняя панель (ник, вкладки, кнопки окна) растёт вместе с шириной окна, как и главная: от 1× до 1,4×.</summary>
+        </member>
+        <member name="M:Launcher.UI.MainWindow.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Mvvm.ObservableObject">
+            <summary>Основа моделей представления: уведомление интерфейса об изменении свойств.</summary>
+        </member>
+        <member name="T:Launcher.UI.Mvvm.RelayCommand">
+            <summary>Синхронная команда.</summary>
+        </member>
+        <member name="T:Launcher.UI.Mvvm.AsyncCommand">
+            <summary>Асинхронная команда: пока выполняется, повторный запуск запрещён; ошибки не роняют приложение.</summary>
+        </member>
+        <member name="P:Launcher.UI.Mvvm.AsyncCommand.UnhandledError">
+            <summary>Вызывается, если команда завершилась исключением (показ пользователю и запись в журнал).</summary>
+        </member>
+        <member name="T:Launcher.UI.Mvvm.BulkObservableCollection`1">
+            <summary>Коллекция, которая умеет добавлять и удалять пачки элементов с одним уведомлением (важно для журнала игры).</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.AppServices">
+            <summary>
+            Сборка сервисов ядра для графического интерфейса. Повторяет сборку консольной версии (CliServices);
+            общий код можно будет вынести в Infrastructure, когда стабилизируются оба интерфейса.
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Services.AppServices.GetBytesAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Скачивает небольшой файл (например, скин) обычным запросом.</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.BuiltInKeys">
+            <summary>
+            Ключ API CurseForge, встроенный в сборку по решению автора (репозиторий приватный).
+            Порядок: ключ из настроек → переменная среды WAUNDBOX_CURSEFORGE_KEY → этот ключ.
+            Внимание: ключ, зашитый в программу, можно достать из готового .exe; не публикуйте репозиторий и сборки, не заменив его.
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Services.LayoutState">
+            <summary>
+            Раскладка главной страницы в памяти и состояние редактора интерфейса (режим правки, выбранный элемент).
+            Сохранением в настройки занимается <see cref="T:Launcher.UI.ViewModels.HomeEditorViewModel"/>.
+            </summary>
+        </member>
+        <member name="E:Launcher.UI.Services.LayoutState.Changed">
+            <summary>Изменился один элемент (id) или вся раскладка (null).</summary>
+        </member>
+        <member name="P:Launcher.UI.Services.LayoutState.SnapStep">
+            <summary>Шаг сетки при перетаскивании и стрелках, пикселей; 0 — сетка выключена.</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.LayoutState.Checkpoint(System.Boolean)">
+            <summary>Запоминает состояние перед правкой. Серия правок подряд (ползунок, стрелки) считается одной.</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.MemoryTrimmer">
+            <summary>Сжимает память процесса: полная сборка мусора с уплотнением и сброс рабочего набора (Windows вернёт страницы по мере надобности).</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.ToastService">
+            <summary>Короткие всплывающие сообщения внизу окна. Исчезают сами.</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.DialogService">
+            <summary>Окно-диалог поверх страниц. Одновременно показывается один диалог.</summary>
+        </member>
+        <member name="P:Launcher.UI.Services.DialogService.IsWide">
+            <summary>Широкое окно (для списков вроде каталога модов).</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.ProfileIcons">
+            <summary>
+            Значки профилей: картинки из папки icons в папке лаунчера (кладутся вручную, подхватываются автоматически).
+            Новому профилю достаётся случайный значок. Размер декодирования — настройка «разрешение значков» (по умолчанию 32).
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Services.ProfileIcons.Names">
+            <summary>Имена файлов значков (только имена, без путей).</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.ProfileIcons.Refresh">
+            <summary>Сбрасывает кэш (после того как файлы в папке поменялись).</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.ShellHelper.Open(System.String)">
+            <summary>Открывает папку, файл или страницу в программе по умолчанию. Возвращает false, если не получилось.</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.SkinImages">
+            <summary>Картинки из скинов: вид спереди, голова, увеличение без размытия. Все результаты заморожены (можно использовать из любого потока интерфейса).</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.SkinImages.Upscale(System.Windows.Media.Imaging.BitmapSource,System.Int32)">
+            <summary>
+            Целочисленное увеличение «по пикселям» для 3D-текстуры: WPF в 3D сглаживает текстуры, поэтому крупные квадраты делаем сами.
+            Формат с предумноженной прозрачностью: иначе на границе прозрачных и цветных пикселей появлялась светлая кайма.
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Services.SkinImages.Front(System.Byte[],System.Boolean,System.Int32)">
+            <summary>Персонаж спереди (16×32 пикселя скина, увеличено в <paramref name="scale"/> раз). Картинка собирается по пикселям, без сглаживания.</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.SkinImages.Head(System.Byte[],System.Int32)">
+            <summary>Лицо с шапкой (8×8 пикселей, увеличено в <paramref name="scale"/> раз) — для значка аккаунта.</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.SkinImages.PadTo(System.Windows.Media.Imaging.BitmapSource,System.Int32,System.Int32)">
+            <summary>
+            Старый скин 64×32 на модели, рассчитанной на 64×64 (например, шаблон из лаунчера), кладётся в верхнюю половину: иначе координаты UV
+            съезжают вдвое. Если размеры уже подходят или не кратны — картинка возвращается без изменений.
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Services.SkinImages.IsSlim(System.Byte[],System.Boolean)">
+            <summary>Тонкие ли руки у скина (определяется по пикселям); если определить нельзя — <paramref name="fallback"/>.</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.SkinImages.ToBgra(System.Windows.Media.Imaging.BitmapSource)">
+            <summary>Пиксели картинки по 4 байта (B, G, R, A).</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.SkinImages.Draw(System.Byte[],System.Int32,System.Int32,System.Byte[],System.Int32,System.Int32,Launcher.Core.Skins.UvRect,System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <summary>Рисует кусок скина на картинку 1:1 (прозрачность накладывается как в Minecraft: второй слой поверх первого).</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.TabCatalog">
+            <summary>Вкладки навигации и элементы главной страницы для редактора интерфейса.</summary>
+        </member>
+        <member name="F:Launcher.UI.Services.TabCatalog.HomeElements">
+            <summary>Элементы главной страницы, которые правятся в редакторе интерфейса.</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.TabCatalog.Order(System.String)">
+            <summary>Сохранённый порядок вкладок: неизвестные id пропускаются, недостающие дописываются в стандартном порядке.</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.ThemePalette">
+            <summary>Итоговые цвета оформления: фон, основной цвет и признак светлой темы.</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.ThemePalette.#ctor(System.Boolean,System.Windows.Media.Color,System.Windows.Media.Color)">
+            <summary>Итоговые цвета оформления: фон, основной цвет и признак светлой темы.</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.ThemeService">
+            <summary>
+            Тема интерфейса: светлая/тёмная, основной цвет, цвет фона. Кисти подменяются в ресурсах приложения,
+            а страницы используют их через DynamicResource, поэтому изменения видны сразу, без перезапуска.
+            Цвет текста выбирается по яркости фона, поэтому текст читается при любом фоне.
+            </summary>
+        </member>
+        <member name="E:Launcher.UI.Services.ThemeService.Applied">
+            <summary>Тема применена (из любого потока события приходят в потоке интерфейса).</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.ThemeService.TryParse(System.String)">
+            <summary>Разбирает #RRGGBB (допускается без решётки); null, если запись некорректна.</summary>
+        </member>
+        <member name="M:Launcher.UI.Services.ThemeService.Luminance(System.Windows.Media.Color)">
+            <summary>Воспринимаемая яркость 0…1.</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.UiContext">
+            <summary>Общие объекты приложения, которые нужны страницам и диалогам.</summary>
+        </member>
+        <member name="T:Launcher.UI.Services.UiSettings">
+            <summary>Настройки лаунчера в памяти. Записи последовательны (одна за другой), чтобы изменения разных страниц не затирали друг друга.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.PreferredAccountChoice">
+            <summary>Вариант выбора аккаунта для запуска (Id = null — автоматически).</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.PreferredAccountChoice.#ctor(System.String,System.String)">
+            <summary>Вариант выбора аккаунта для запуска (Id = null — автоматически).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.AccountViewModel">
+            <summary>Страница «Аккаунт»: вход через Microsoft (device code), вход через Ely.by и ник для локального режима.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ActiveKind">
+            <summary>Какой аккаунт будет использован для запуска игры (с учётом выбора и того, куда выполнен вход).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ExportTemplateCommand">
+            <summary>Сохраняет стандартную модель в файл .bbmodel для редактирования в Blockbench.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.HeadImage">
+            <summary>Лицо текущего скина (8×8, увеличено) для значка аккаунта в верхней панели.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.MicrosoftHead">
+            <summary>Лицо скина, который используется при входе через Microsoft (скин с серверов Mojang).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ElyHead">
+            <summary>Лицо скина Ely.by (скин с сайта ely.by).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.DevHead">
+            <summary>Лицо скина в режиме разработки: выбранный в лаунчере файл или стандартный.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.AccountViewModel.DownloadElySkinAsync(System.String,System.String)">
+            <summary>
+            Скин с ely.by. Сначала система скинов по нику (адрес начинается с http: .NET не следует за перенаправлением с https на http),
+            если не вышло — профиль на сервере авторизации по UUID (поле textures).
+            </summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ModelSkinPng">
+            <summary>Скин, который показан на модели: с серверов Mojang (вход Microsoft) или выбранный здесь файл; null — стандартная раскраска.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.PoseChoices">
+            <summary>Позы стандартной модели для списка в настройках.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ModelSpin">
+            <summary>Автоматическое вращение 3D-персонажа.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ShowModel3D">
+            <summary>Показывать 3D-персонажа на главной.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ModelOverlay">
+            <summary>Второй слой скина на стандартной модели.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ModelSlim">
+            <summary>Тонкие руки (Alex) у показанной модели.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.CustomModel">
+            <summary>Модель из Blockbench вместо стандартной; null — стандартная.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.SkinSlim">
+            <summary>Модель скина (Steve/Alex): хранится в настройках, используется для показа и при загрузке скина в Microsoft.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.SkinHead">
+            <summary>Лицо персонажа (увеличенный фрагмент 8×8 из скина).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.SkinFull">
+            <summary>Вся текстура скина.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.DisplayName">
+            <summary>Имя в шапке окна.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.AccountViewModel.RefreshModelAsync">
+            <summary>Выбирает, какой скин и какую модель показывать на главной.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.AccountViewModel.PrepareModel(Launcher.Core.Skins.SkinModel)">
+            <summary>Модель из шаблона лаунчера (или при включённой настройке) показывается с выбранным скином, а не с текстурой из файла.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.AccountViewModel.ModelUseSkin">
+            <summary>Накладывать выбранный скин на свою модель вместо текстуры из файла.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.AccountViewModel.UploadMicrosoftSkinAsync">
+            <summary>Загружает PNG на серверы Mojang: новый скин увидят и другие игроки.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ConfirmViewModel">
+            <summary>Диалог подтверждения («Удалить профиль?»).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ConsoleSession">
+            <summary>
+            Консоль одного запуска (одного профиля). Строки приходят из потоков процесса в очередь сеанса;
+            интерфейс забирает их пачками. Хранится не больше <see cref="F:Launcher.UI.ViewModels.ConsoleSession.MaxLines"/> строк — остальное в файле журнала.
+            </summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ConsoleSession.IsLive">
+            <summary>Игра ещё работает (или готовится к запуску).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ConsoleSession.Cleared">
+            <summary>Лог очистили вручную: после завершения игры сеанс убирается из списка.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ConsoleViewModel">
+            <summary>
+            Консоль игры: у каждого запущенного профиля свой сеанс (вкладка). Можно играть в несколько профилей сразу,
+            вывод игр не смешивается. Завершённые сеансы остаются для просмотра (последние несколько).
+            </summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ConsoleViewModel.Current">
+            <summary>Показываемый сеанс.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ConsoleViewModel.HasSeveralSessions">
+            <summary>Вкладки показываются, когда сеансов больше одного.</summary>
+        </member>
+        <member name="E:Launcher.UI.ViewModels.ConsoleViewModel.Flushed">
+            <summary>Вызывается после каждой пачки строк — страница прокручивает список к концу.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.ConsoleViewModel.Select(System.String)">
+            <summary>Открывает консоль профиля (например, когда игра упала).</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.ConsoleViewModel.BeginSession(System.String,System.String)">
+            <summary>Начинает сеанс профиля (из потока интерфейса). Старый сеанс того же профиля заменяется.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.ConsoleViewModel.Write(Launcher.UI.ViewModels.ConsoleSession,Launcher.Core.GameLaunch.GameOutputLine)">
+            <summary>Вывод игры (вызывается из потоков процесса).</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.ConsoleViewModel.CopyLines(System.Collections.Generic.IEnumerable{Launcher.UI.ViewModels.ConsoleLine})">
+            <summary>Копирует строки консоли в буфер обмена (все или выделенные).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.CustomJarViewModel">
+            <summary>Диалог «Свой jar»: выбор jar (и, при желании, json версии), базовая версия, имя; установка и создание профиля.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.TabEditItem">
+            <summary>Строка редактора: вкладка навигации (порядок и видимость).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.DeveloperViewModel">
+            <summary>Вкладка разработчика: проверочные параметры, счётчик кадров, диагностика и редактор интерфейса.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.DeveloperViewModel.SelectedSize">
+            <summary>Разрешение, в котором загружаются значки профилей.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.DeveloperViewModel.ShowFps">
+            <summary>Счётчик кадров в правом нижнем углу окна. В покое WPF не перерисовывает окно, поэтому число тогда низкое — это нормально.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.DeveloperViewModel.MaxGraphics">
+            <summary>Максимальная графика: 3D-модель всегда рисуется в полном размере окна без потери качества (грузит процессор сильнее).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.DeveloperViewModel.AutoRefresh">
+            <summary>Обновлять диагностику автоматически, пока открыта вкладка.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.DeveloperViewModel.Editor">
+            <summary>Редактор главной: перетаскивание элементов и точная настройка каждого свойства.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.EditorElement">
+            <summary>Элемент главной страницы, который можно править в редакторе.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.EditorElement.#ctor(System.String,System.String)">
+            <summary>Элемент главной страницы, который можно править в редакторе.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.HomeEditorViewModel">
+            <summary>
+            Редактор главной страницы: выбор элемента, его положение, масштаб, прозрачность, скругление, видимость.
+            Менять можно только внешний вид — что делает кнопка, не настраивается.
+            </summary>
+        </member>
+        <member name="E:Launcher.UI.ViewModels.HomeEditorViewModel.OpenRequested">
+            <summary>Редактору нужна главная страница: окно переключает на неё.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.HomeEditorViewModel.SnapToGrid">
+            <summary>Привязка к сетке 10 px при перетаскивании и стрелках.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.HomeEditorViewModel.Nudge(System.Double,System.Double)">
+            <summary>Сдвиг выбранного элемента стрелками (шаг сетки или 1 px).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.HomeViewModel">
+            <summary>Главная: выбор профиля и большая кнопка «Играть».</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.HomeViewModel.Editor">
+            <summary>Редактор интерфейса главной страницы (включается во вкладке разработчика).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.IconChoice">
+            <summary>Один вариант в выборе значка: файл (или «без значка») и его картинка.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.IconChoice.#ctor(System.String,System.Windows.Media.ImageSource)">
+            <summary>Один вариант в выборе значка: файл (или «без значка») и его картинка.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.IconPickerViewModel">
+            <summary>Выбор значка профиля из папки icons. Для нового профиля по умолчанию выбирается случайный.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.IconPickerViewModel.Value">
+            <summary>Имя выбранного файла или null.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ImportPackViewModel">
+            <summary>Диалог «Импорт сборки Modrinth (.mrpack)»: ставит игру и загрузчик, скачивает файлы сборки, создаёт профиль.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.ImportPackViewModel.SuggestNameAsync(Launcher.UI.Services.UiContext,System.String)">
+            <summary>Имя профиля из названия сборки: только то, что разрешено в именах профилей, и без повторов.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.LaunchController">
+            <summary>
+            Запуск и остановка игр. Можно играть в несколько профилей одновременно: у каждого профиля своё состояние
+            (<see cref="P:Launcher.UI.ViewModels.ProfileItem.State"/>), своя кнопка «Играть/Стоп» и свой сеанс консоли. Один и тот же профиль
+            второй раз запустить нельзя (у него общая папка игры).
+            Подготовка к запуску (проверка файлов, natives, ресурсы) идёт по одному профилю за раз, чтобы два запуска
+            не писали в одни и те же общие файлы; сами игры после старта работают независимо.
+            </summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.LaunchController.PlayCommand">
+            <summary>Запускает профиль из параметра (ProfileItem) или выбранный.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.LaunchController.StopCommand">
+            <summary>Останавливает игру профиля из параметра (ProfileItem) или выбранного.</summary>
+        </member>
+        <member name="E:Launcher.UI.ViewModels.LaunchController.Crashed">
+            <summary>Игра закрылась с ошибкой (не по просьбе пользователя): имя профиля.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.LaunchController.RunningCount">
+            <summary>Сколько игр сейчас работает.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.LaunchController.IsRunning">
+            <summary>Работает хотя бы одна игра.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.MainViewModel">
+            <summary>Главное окно: страницы, навигация, диалоги и уведомления.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.MainViewModel.ShowFps">
+            <summary>Счётчик кадров в углу окна (включается во вкладке разработчика).</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.MainViewModel.ApplyDeveloperAndIcons">
+            <summary>
+            Применяет настройки интерфейса: порядок и видимость вкладок, вкладка разработчика, счётчик кадров,
+            разрешение значков (при смене перечитывает каталог профилей).
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.MainViewModel.MoveTab(Launcher.UI.ViewModels.PageViewModel,System.Int32)">
+            <summary>Переносит вкладку на новое место (перетаскивание в редакторе) и запоминает порядок, не трогая скрытые вкладки.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.MemorySelection">
+            <summary>
+            Выбор памяти для игры: ползунок доходит только до оперативной памяти компьютера, а в поле можно вписать любое число (в МБ).
+            Если число больше ползунка, ползунок стоит на максимуме; как только его сдвинули, число заменяется положением ползунка.
+            </summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.MemorySelection.PhysicalMb">
+            <summary>Оперативная память компьютера, МБ.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.MemorySelection.Text">
+            <summary>Значение в поле ввода: только цифры.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.MemorySelection.Value">
+            <summary>Выбранная память в МБ (для сохранения в профиль).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ModCardItem">
+            <summary>Карточка проекта в каталоге или в «рекомендуем».</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.InstalledItem">
+            <summary>Строка списка «Установлено».</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ModsViewModel">
+            <summary>Окно «Моды» профиля: каталог Modrinth, рекомендуемое, установленное, обновления.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ModsViewModel.Notice">
+            <summary>Сообщение вместо списка: «ничего не найдено», «нужен загрузчик» и т.п.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ModsViewModel.ShopHint">
+            <summary>Подсказка под строкой поиска: у шейдеров свои особенности.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.ModsViewModel.CheckLoader">
+            <summary>false — в профиле без загрузчика моды ставить нельзя (сообщение выставлено).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.NewProfileViewModel">
+            <summary>Диалог «Новый профиль»: загрузчик, версия игры, память; установка с прогрессом и отменой.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.NewProfileViewModel.IsModernForgeVersion(System.String)">
+            <summary>Установщик Forge поддерживает версии игры 1.13 и новее.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.PageViewModel">
+            <summary>Страница главного окна (вкладка верхней навигации).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.PageViewModel.Glyph">
+            <summary>Символ шрифта Segoe MDL2 Assets.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ProfileCatalog">
+            <summary>Список профилей и выбранный профиль (общий для главной страницы и страницы профилей).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ProfileEditViewModel">
+            <summary>Диалог «Настройки профиля»: память, аргументы, Java, удаление.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ProfileEditViewModel.SelectedGc">
+            <summary>Сборщик мусора Java. Если выбранная Java его не поддерживает, при запуске будет стандартный и предупреждение.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.LaunchState">
+            <summary>Состояние запуска одного профиля.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ProfileItem">
+            <summary>Профиль для показа в списках: название, версия, загрузчик, память и состояние запуска.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ProfileItem.Icon">
+            <summary>Значок профиля (картинка из папки icons) или null.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ProfileItem.IconBrush">
+            <summary>Значок как кисть: заполняет весь скруглённый квадрат (UniformToFill).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ProfileItem.IsPlaying">
+            <summary>Игра запущена и работает.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ProfileItem.IsRunning">
+            <summary>Профиль занят: готовится к запуску или игра запущена (редактировать и удалять нельзя).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ProfileItem.StatusText">
+            <summary>Пояснение к текущему состоянию («Проверяю файлы игры…», «Игра запущена»).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ProfilesViewModel">
+            <summary>Страница профилей: сетка карточек, создание, настройка, запуск (по образцу «экземпляров» Prism Launcher).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ProfilesViewModel.PlayCommand">
+            <summary>Запуск конкретной карточки (команда лаунчера принимает ProfileItem).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.ProfilesViewModel.StopCommand">
+            <summary>Остановка игры конкретной карточки.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.ProfilesViewModel.ImportPackAsync">
+            <summary>Выбор файла сборки (.mrpack или zip CurseForge), чтение описания и показ окна импорта.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.ColorChoice">
+            <summary>Образец цвета: запись #RRGGBB и кисть для показа.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.ColorChoice.#ctor(System.String,System.Windows.Media.Brush)">
+            <summary>Образец цвета: запись #RRGGBB и кисть для показа.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.SettingsViewModel">
+            <summary>Страница «Настройки»: Java, экономный режим, папки.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.SettingsViewModel.Account">
+            <summary>Нужен странице настроек для блока «Модель персонажа» (выбор модели Blockbench).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.SettingsViewModel.BackgroundSwatches">
+            <summary>Образцы фона зависят от выбранной темы.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.SettingsViewModel.SelectedTheme">
+            <summary>При смене темы цвет фона возвращается к стандартному для неё, основной цвет остаётся вашим.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.SettingsViewModel.VersionText">
+            <summary>Версия лаунчера для плашки внизу настроек.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.SettingsViewModel.OpenIconsFolderCommand">
+            <summary>Папка со значками профилей (для подсказки в настройках).</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.SettingsViewModel.RegisterVersionClick">
+            <summary>Десятое нажатие на плашку версии открывает вкладку разработчика (без подсказок и анимаций).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.SettingsViewModel.BackgroundGlow">
+            <summary>Фоновое свечение («дым»): можно отключить совсем.</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.SettingsViewModel.IdleEco">
+            <summary>Через 10 секунд без действий лаунчер переходит в экономный режим (анимации и вращение модели останавливаются).</summary>
+        </member>
+        <member name="P:Launcher.UI.ViewModels.SettingsViewModel.CurseForgeKey">
+            <summary>Ключ API CurseForge для импорта сборок CurseForge; сохраняется при каждом изменении.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.SettingsViewModel.EnsureScannedAsync">
+            <summary>Поиск Java выполняется при первом открытии страницы (запускает java -version у найденных установок).</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.SkinCard">
+            <summary>Плитка скина в коллекции: двухмерный вид спереди, имя, модель.</summary>
+        </member>
+        <member name="T:Launcher.UI.ViewModels.SkinsViewModel">
+            <summary>Вкладка «Скины»: коллекция скинов с плитками (как в официальном лаунчере). Выбор делает скин текущим; в аккаунт Microsoft он уходит отдельной кнопкой.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.SkinsViewModel.EnsureLoadedAsync">
+            <summary>Читает коллекцию при первом показе вкладки.</summary>
+        </member>
+        <member name="M:Launcher.UI.ViewModels.SkinsViewModel.UseAsync(System.Object)">
+            <summary>Делает скин текущим: его показывает модель на главной и он используется в одиночной игре (режим разработки).</summary>
+        </member>
+        <member name="T:Launcher.UI.Views.AccountView">
+            <summary>
+            AccountView
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.AccountView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.ConfirmDialog">
+            <summary>
+            ConfirmDialog
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.ConfirmDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.ConsoleView">
+            <summary>
+            ConsoleView
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.ConsoleView.OnLinesSelectionChanged(System.Object,System.Windows.Controls.SelectionChangedEventArgs)">
+            <summary>Пока пользователь выделяет текст, автопрокрутка отключается: иначе список «убегает» из-под курсора.</summary>
+        </member>
+        <member name="M:Launcher.UI.Views.ConsoleView.OnScrollChanged(System.Object,System.Windows.Controls.ScrollChangedEventArgs)">
+            <summary>Пользователь прокрутил вверх — автопрокрутка выключается; вернулся в самый низ — включается снова.</summary>
+        </member>
+        <member name="M:Launcher.UI.Views.ConsoleView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.CustomJarDialog">
+            <summary>
+            CustomJarDialog
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.CustomJarDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.DeveloperView">
+            <summary>
+            DeveloperView
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.DeveloperView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.HomeView">
+            <summary>
+            HomeView
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.HomeView.FitPanel">
+            <summary>На широком и высоком окне панель запуска крупнее (до 1.8×), в обычном размере — как есть.</summary>
+        </member>
+        <member name="M:Launcher.UI.Views.HomeView.Update">
+            <summary>Бесконечные анимации идут только пока страница видна и экономный режим выключен.</summary>
+        </member>
+        <member name="M:Launcher.UI.Views.HomeView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.IconPicker">
+            <summary>
+            IconPicker
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.IconPicker.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.ImportPackDialog">
+            <summary>
+            ImportPackDialog
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.ImportPackDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.MemoryPicker">
+            <summary>
+            MemoryPicker
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.MemoryPicker.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.ModsDialog">
+            <summary>
+            ModsDialog
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.ModsDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.NewProfileDialog">
+            <summary>
+            NewProfileDialog
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.NewProfileDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.ProfileEditDialog">
+            <summary>
+            ProfileEditDialog
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.ProfileEditDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.ProfilesView">
+            <summary>
+            ProfilesView
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.ProfilesView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Launcher.UI.Views.SettingsView">
+            <summary>
+            SettingsView
+            </summary>
+        </member>
+        <member name="M:Launcher.UI.Views.SettingsView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:XamlGeneratedNamespace.GeneratedInternalTypeHelper">
+            <summary>
+            GeneratedInternalTypeHelper
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateInstance(System.Type,System.Globalization.CultureInfo)">
+            <summary>
+            CreateInstance
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.GetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            GetPropertyValue
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.SetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            SetPropertyValue
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateDelegate(System.Type,System.Object,System.String)">
+            <summary>
+            CreateDelegate
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.AddEventHandler(System.Reflection.EventInfo,System.Object,System.Delegate)">
+            <summary>
+            AddEventHandler
+            </summary>
+        </member>
+    </members>
+</doc>
