@@ -16,6 +16,7 @@ internal sealed class UiContext
         Console = new ConsoleViewModel(this);
         Launcher = new LaunchController(this);
         Account = new AccountViewModel(this);
+        Updates = new UpdateController(this);
         Skins = new SkinsViewModel(this);
         HomeEditor = new HomeEditorViewModel(this);
     }
@@ -28,6 +29,7 @@ internal sealed class UiContext
     public ConsoleViewModel Console { get; }
     public LaunchController Launcher { get; }
     public AccountViewModel Account { get; }
+    public UpdateController Updates { get; }
     public SkinsViewModel Skins { get; }
     public HomeEditorViewModel HomeEditor { get; }
 }

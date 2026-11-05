@@ -67,6 +67,15 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+                    <Grid Margin="0,16,0,0">
+                        <StackPanel Margin="0,0,70,0">
+                            <TextBlock Text="Жидкое стекло" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap"
+                                       Text="Панели и окна получают переливающийся блик и светлую кромку, как стекло. Меняется только оформление: нагрузка на компьютер не растёт. Включается и выключается сразу." />
+                        </StackPanel>
+                        <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                      IsChecked="{Binding LiquidGlass, Mode=TwoWay}" />
+                    </Grid>
 
                     <TextBlock Text="Основной цвет" FontWeight="SemiBold" Margin="0,6,0,6" />
                     <ItemsControl ItemsSource="{Binding AccentSwatches}">
@@ -157,6 +166,26 @@
                     </WrapPanel>
                 </StackPanel>
             </Border>
+                    <Border Style="{StaticResource Glass}" Margin="0,0,0,16" c:Motion.Appear="True">
+                        <StackPanel>
+                            <TextBlock Text="Обновления" Style="{StaticResource SubHeading}" />
+                            <Grid Margin="0,12,0,0">
+                                <StackPanel Margin="0,0,70,0">
+                                    <TextBlock Text="Проверять обновления" FontWeight="SemiBold" />
+                                    <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap"
+                                               Text="При запуске и раз в несколько часов лаунчер смотрит, не вышла ли новая версия. Если вышла, появится окно и вкладка «Обновление»." />
+                                </StackPanel>
+                                <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                              IsChecked="{Binding AutoCheckUpdates, Mode=TwoWay}" />
+                            </Grid>
+                            <Grid Margin="0,14,0,0">
+                                <TextBlock Text="{Binding Updates.LastCheckText}" Style="{StaticResource Muted}" FontSize="12.5"
+                                           TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,200,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Проверить обновления" HorizontalAlignment="Right"
+                                        Padding="14,7" FontSize="12" c:Ui.CornerRadius="11" Command="{Binding Updates.CheckNowCommand}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
                     <Border Style="{StaticResource Glass}" Margin="0,0,0,16" Padding="22,16" MouseLeftButtonUp="OnVersionClick">
                         <Grid>
                             <StackPanel>

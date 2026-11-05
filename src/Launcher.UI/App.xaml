@@ -29,6 +29,9 @@
             <DataTemplate DataType="{x:Type vm:DeveloperViewModel}">
                 <views:DeveloperView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:UpdateViewModel}">
+                <views:UpdateView />
+            </DataTemplate>
 
             <!-- Диалоги -->
             <DataTemplate DataType="{x:Type vm:NewProfileViewModel}">
@@ -48,6 +51,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:ConfirmViewModel}">
                 <views:ConfirmDialog />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:UpdateDialogViewModel}">
+                <views:UpdateDialog />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

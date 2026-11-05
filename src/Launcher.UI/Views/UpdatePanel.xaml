@@ -1,0 +1,49 @@
+<UserControl x:Class="Launcher.UI.Views.UpdatePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- DataContext: UpdateController. Одна и та же панель стоит и в окне обновления, и на вкладке «Обновление». -->
+    <StackPanel>
+        <TextBlock Text="{Binding Heading}" Style="{StaticResource Heading}" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding VersionLine}" Style="{StaticResource Muted}" Margin="0,6,0,0" TextWrapping="Wrap" />
+
+        <Border Margin="0,14,0,0" Padding="14,10" CornerRadius="12" Background="{DynamicResource AccentSoftBrush}"
+                Visibility="{Binding IsRequired, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{Binding RequiredHint}" TextWrapping="Wrap" FontWeight="SemiBold" />
+        </Border>
+
+        <TextBlock Text="Что нового" FontWeight="SemiBold" Margin="0,18,0,6"
+                   Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}" />
+        <ScrollViewer MaxHeight="260" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{Binding Notes}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,0,8,0" />
+        </ScrollViewer>
+
+        <TextBlock Text="{Binding Hint}" Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap" Margin="0,14,0,0"
+                   Visibility="{Binding HasHint, Converter={StaticResource BoolToVis}}" />
+
+        <StackPanel Margin="0,16,0,0" Visibility="{Binding IsInstalling, Converter={StaticResource BoolToVis}}">
+            <ProgressBar Value="{Binding Progress, Mode=OneWay}" Maximum="100" />
+        </StackPanel>
+        <TextBlock Text="{Binding StatusText}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,10,0,0"
+                   Visibility="{Binding HasStatus, Converter={StaticResource BoolToVis}}" />
+        <TextBlock Text="{Binding Error}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" Margin="0,10,0,0"
+                   Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}" />
+
+        <WrapPanel HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Style="{StaticResource GhostButton}" Content="Позже" Margin="10,0,0,0" Command="{Binding LaterCommand}"
+                    Visibility="{Binding CanDismiss, Converter={StaticResource BoolToVis}}" />
+            <Button Style="{StaticResource GhostButton}" Content="Выйти из лаунчера" Margin="10,0,0,0" Command="{Binding ExitCommand}"
+                    Visibility="{Binding ShowExit, Converter={StaticResource BoolToVis}}" />
+            <Button Style="{StaticResource GhostButton}" Content="Проверить снова" Margin="10,0,0,0" Command="{Binding CheckNowCommand}"
+                    Visibility="{Binding ShowRetry, Converter={StaticResource BoolToVis}}" />
+            <Button Style="{StaticResource GhostButton}" Content="Отмена" Margin="10,0,0,0" Command="{Binding CancelInstallCommand}"
+                    Visibility="{Binding IsInstalling, Converter={StaticResource BoolToVis}}" />
+            <Button Style="{StaticResource GhostButton}" Content="Установить самому" Margin="10,0,0,0" Command="{Binding OpenPageCommand}"
+                    ToolTip="Откроется страница релиза на GitHub: скачайте установщик и запустите его"
+                    Visibility="{Binding ShowManual, Converter={StaticResource BoolToVis}}" />
+            <Button Style="{StaticResource PrimaryButton}" Content="Установить" Margin="10,0,0,0" Command="{Binding InstallCommand}"
+                    ToolTip="Лаунчер сам скачает и проверит установщик, закроется и обновится"
+                    Visibility="{Binding ShowInstall, Converter={StaticResource BoolToVis}}" />
+        </WrapPanel>
+    </StackPanel>
+</UserControl>

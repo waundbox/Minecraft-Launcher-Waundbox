@@ -269,9 +269,16 @@ public partial class MainWindow : Window
 
     // ----- закрытие -----
 
+    /// <summary>Закрывает лаунчер без вопроса «Закрыть лаунчер?» (после запуска установщика обновления и по кнопке «Выйти»).</summary>
+    internal void ForceClose()
+    {
+        _forceClose = true;
+        Close();
+    }
+
     protected override async void OnClosing(CancelEventArgs e)
     {
-        if (_forceClose || !_vm.Launcher.IsRunning)
+        if (_forceClose || !_vm.Launcher.IsRunning || _vm.Dialogs.IsLocked) // при обязательном обновлении выйти можно без вопросов
         {
             base.OnClosing(e);
             return;

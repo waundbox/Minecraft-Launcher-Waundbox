@@ -1,0 +1,12 @@
+<UserControl x:Class="Launcher.UI.Views.UpdateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls"
+             xmlns:v="clr-namespace:Launcher.UI.Views">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Border Style="{StaticResource Glass}" Margin="40,8,40,28" MaxWidth="760" HorizontalAlignment="Center" VerticalAlignment="Top"
+                c:Motion.Appear="True">
+            <v:UpdatePanel DataContext="{Binding Controller}" />
+        </Border>
+    </ScrollViewer>
+</UserControl>

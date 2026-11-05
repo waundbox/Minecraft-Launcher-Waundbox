@@ -14,6 +14,7 @@ using Launcher.Core.NeoForge;
 using Launcher.Core.Mods;
 using Launcher.Core.Profiles;
 using Launcher.Core.Skins;
+using Launcher.Core.Updates;
 using Launcher.Core.Versions;
 using Launcher.Infrastructure.Authentication;
 using Launcher.Infrastructure.Configuration;
@@ -27,6 +28,7 @@ using Launcher.Infrastructure.Logging;
 using Launcher.Infrastructure.Mods;
 using Launcher.Infrastructure.NeoForge;
 using Launcher.Infrastructure.Profiles;
+using Launcher.Infrastructure.Updates;
 using Launcher.Infrastructure.Versions;
 
 namespace Launcher.UI.Services;
@@ -69,6 +71,8 @@ internal sealed class AppServices : IDisposable
     public MrpackImporter Mrpack { get; }
     public ICurseForgeClient CurseForge { get; }
     public CustomJarInstaller CustomJar { get; }
+    public UpdateChecker UpdateChecker { get; }
+    public UpdateDownloader UpdateDownloader { get; }
 
     private AppServices(
         HttpClient metadataHttp, HttpClient downloadHttp, LauncherPaths paths, ILauncherLogger logger,
@@ -76,7 +80,8 @@ internal sealed class AppServices : IDisposable
         IJavaDetector javaDetector, MinecraftLayout layout, IProfileStore profiles, GameLaunchService launch,
         IFabricMetaClient fabricMeta, FabricInstaller fabric, IQuiltMetaClient quiltMeta, QuiltInstaller quilt, IForgeMetaClient forgeMeta, ForgeInstaller forge, INeoForgeMetaClient neoForgeMeta, NeoForgeInstaller neoForge,
         AccountService accounts, ElyAccountService ely, SkinService skins, IModrinthClient modrinth, ModManager mods, MrpackImporter mrpack,
-        ICurseForgeClient curseForge, SkinLibrary skinLibrary, CustomJarInstaller customJar)
+        ICurseForgeClient curseForge, SkinLibrary skinLibrary, CustomJarInstaller customJar,
+        UpdateChecker updateChecker, UpdateDownloader updateDownloader)
     {
         _metadataHttp = metadataHttp;
         _downloadHttp = downloadHttp;
@@ -106,6 +111,8 @@ internal sealed class AppServices : IDisposable
         CurseForge = curseForge;
         SkinLibrary = skinLibrary;
         CustomJar = customJar;
+        UpdateChecker = updateChecker;
+        UpdateDownloader = updateDownloader;
     }
 
     public static AppServices Create()
@@ -169,7 +176,8 @@ internal sealed class AppServices : IDisposable
         return new AppServices(metadataHttp, downloadHttp, paths, logger, manifest, installer, settings, javaDetector,
             layout, new JsonProfileStore(paths.ProfilesFile), launch, fabricMeta, fabric, quiltMeta, quilt, forgeMeta, forge, neoForgeMeta, neoForge, accounts, ely,
             new SkinService(layout, paths.SkinFile, logger), modrinth, mods, mrpack, curseForge,
-            new SkinLibrary(paths.SkinLibraryDirectory), new CustomJarInstaller(installer, installer, layout, logger));
+            new SkinLibrary(paths.SkinLibraryDirectory), new CustomJarInstaller(installer, installer, layout, logger),
+            new UpdateChecker(new GitHubUpdateClient(metadataHttp), logger), new UpdateDownloader(downloadHttp, logger));
     }
 
     public void Dispose()

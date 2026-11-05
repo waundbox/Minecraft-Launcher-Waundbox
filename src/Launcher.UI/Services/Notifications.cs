@@ -77,16 +77,59 @@ public sealed class DialogService : ObservableObject
         private set => Set(ref _isWide, value);
     }
 
+    private object? _locked;
+
+    /// <summary>Окно заблокировано (обязательное обновление): его нельзя закрыть, другие окна не показываются, страницы под ним недоступны.</summary>
+    public bool IsLocked => _locked is not null;
+
+    public bool IsUnlocked => _locked is null;
+
     public void Show(object dialog, bool wide = false)
     {
+        if (_locked is not null && !ReferenceEquals(dialog, _locked)) return;
         IsWide = wide;
         Current = dialog;
     }
 
-    public void Close() => Current = null;
+    /// <summary>Показывает окно, которое нельзя закрыть, пока не вызван <see cref="Unlock"/>.</summary>
+    public void ShowLocked(object dialog)
+    {
+        _locked = dialog;
+        IsWide = false;
+        Current = dialog;
+        NotifyLock();
+    }
+
+    /// <summary>Делает уже открытое окно незакрываемым.</summary>
+    public void Lock()
+    {
+        if (_current is null || ReferenceEquals(_locked, _current)) return;
+        _locked = _current;
+        NotifyLock();
+    }
+
+    public void Unlock()
+    {
+        if (_locked is null) return;
+        _locked = null;
+        NotifyLock();
+    }
+
+    private void NotifyLock()
+    {
+        OnPropertyChanged(nameof(IsLocked));
+        OnPropertyChanged(nameof(IsUnlocked));
+    }
+
+    public void Close()
+    {
+        if (_locked is not null) return;
+        Current = null;
+    }
 
     public Task<bool> ConfirmAsync(string title, string message, string okText, bool danger = false)
     {
+        if (_locked is not null) return Task.FromResult(false); // пока висит обязательное окно, другие не показываются
         var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         Show(new ViewModels.ConfirmViewModel(this, title, message, okText, danger, tcs));
         return tcs.Task;

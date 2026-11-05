@@ -28,6 +28,9 @@ namespace Launcher.Core.Configuration;
 /// <param name="BackgroundGlow">Показывать фоновое свечение («дым»).</param>
 /// <param name="MaxGraphics">Максимальная графика (режим разработчика): 3D-модель всегда рисуется в полном размере окна.</param>
 /// <param name="IdleEco">Через 10 секунд без действий в окне лаунчера переходить в экономный режим.</param>
+/// <param name="AutoCheckUpdates">Проверять наличие новой версии лаунчера при запуске и раз в несколько часов.</param>
+/// <param name="RequiredUpdateVersion">Версия, до которой лаунчер обязан обновиться (запоминается, чтобы окно обновления оставалось и без интернета); null — обязательного обновления нет.</param>
+/// <param name="LiquidGlass">Эффект «жидкое стекло»: панели и окна с переливающимся бликом и светлой кромкой (только оформление, без размытия фона, ресурсы не тратятся).</param>
 /// <param name="CustomModelPath">Путь к .bbmodel из Blockbench, который показывается на главной вместо стандартной модели; null — стандартная.</param>
 public sealed record LauncherSettings(
     string? JavaPath = null,
@@ -57,7 +60,10 @@ public sealed record LauncherSettings(
     string? HomeLayout = null,
     bool BackgroundGlow = true,
     bool MaxGraphics = false,
-    bool IdleEco = true)
+    bool IdleEco = true,
+    bool AutoCheckUpdates = true,
+    string? RequiredUpdateVersion = null,
+    bool LiquidGlass = false)
 {
     public const int DefaultAnimationFps = 120;
     public const int DefaultIconSize = 32;

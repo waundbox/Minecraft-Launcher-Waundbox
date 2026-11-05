@@ -7,7 +7,7 @@
     <AssemblyName>Waundbox</AssemblyName>
     <RootNamespace>Launcher.UI</RootNamespace>
     <ApplicationIcon>Waundbox.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>Waundbox</Product>
     <Company>Waundbox</Company>
     <Description>Waundbox — лаунчер Minecraft</Description>

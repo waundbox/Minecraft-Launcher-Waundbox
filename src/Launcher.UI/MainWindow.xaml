@@ -52,6 +52,7 @@
                         Style="{StaticResource GhostButton}" Padding="8,5,14,5" c:Ui.CornerRadius="17"
                         Background="Transparent" BorderThickness="0"
                         shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                        IsEnabled="{Binding Dialogs.IsUnlocked}"
                         Command="{Binding NavigateCommand}" CommandParameter="{Binding Account}">
                     <StackPanel Orientation="Horizontal">
                         <Border Width="{DynamicResource TopHead}" Height="{DynamicResource TopHead}" CornerRadius="4" Background="{DynamicResource AccentSoftBrush}" ClipToBounds="True" SnapsToDevicePixels="True">
@@ -63,7 +64,8 @@
                     </StackPanel>
                 </Button>
 
-                <Grid Grid.Column="1" x:Name="TabsHost" VerticalAlignment="Center" Height="{DynamicResource TabHeight}">
+                <Grid Grid.Column="1" x:Name="TabsHost" VerticalAlignment="Center" Height="{DynamicResource TabHeight}"
+                      IsEnabled="{Binding Dialogs.IsUnlocked}">
                     <Border x:Name="NavIndicator" HorizontalAlignment="Left" Height="{DynamicResource TabHeight}" Width="0" CornerRadius="14"
                             Background="{DynamicResource AccentSoftBrush}" IsHitTestVisible="False">
                         <Border.RenderTransform>
@@ -105,7 +107,7 @@
 
             <!-- Страницы с переходами и свайпом -->
             <c:PageHost x:Name="Host" Grid.Row="1" Pages="{Binding Pages}" Current="{Binding Current}"
-                        />
+                        IsEnabled="{Binding Dialogs.IsUnlocked}" />
         </Grid>
 
         <!-- Уведомления -->

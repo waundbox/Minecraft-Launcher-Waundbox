@@ -190,6 +190,30 @@ internal sealed class SettingsViewModel : PageViewModel
     }
 
     /// <summary>Через 10 секунд без действий лаунчер переходит в экономный режим (анимации и вращение модели останавливаются).</summary>
+    /// <summary>Обновление лаунчера: кнопка «Проверить обновления» и сведения о последней проверке.</summary>
+    public UpdateController Updates => _ctx.Updates;
+
+    /// <summary>«Жидкое стекло» (раздел «Тема и цвета»): включается и выключается сразу.</summary>
+    public bool LiquidGlass
+    {
+        get => _ctx.Settings.Current.LiquidGlass;
+        set
+        {
+            if (_ctx.Settings.Current.LiquidGlass == value) return;
+            _ = _ctx.Settings.UpdateAsync(s => s with { LiquidGlass = value });
+        }
+    }
+
+    public bool AutoCheckUpdates
+    {
+        get => _ctx.Settings.Current.AutoCheckUpdates;
+        set
+        {
+            if (_ctx.Settings.Current.AutoCheckUpdates == value) return;
+            _ = _ctx.Settings.UpdateAsync(s => s with { AutoCheckUpdates = value });
+        }
+    }
+
     public bool IdleEco
     {
         get => _ctx.Settings.Current.IdleEco;
@@ -239,6 +263,8 @@ internal sealed class SettingsViewModel : PageViewModel
             EcoMode = _ctx.Settings.Current.EcoMode;
             OnPropertyChanged(nameof(BackgroundGlow));
             OnPropertyChanged(nameof(IdleEco));
+            OnPropertyChanged(nameof(AutoCheckUpdates));
+            OnPropertyChanged(nameof(LiquidGlass));
             CurseForgeKey = _ctx.Settings.Current.CurseForgeApiKey ?? "";
             Motion.SetEco(_eco);
             var current = _ctx.Settings.Current;

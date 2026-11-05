@@ -5,7 +5,7 @@ using Launcher.Core.Configuration;
 namespace Launcher.UI.Services;
 
 /// <summary>Итоговые цвета оформления: фон, основной цвет и признак светлой темы.</summary>
-internal sealed record ThemePalette(bool IsLight, Color Background, Color Accent);
+internal sealed record ThemePalette(bool IsLight, Color Background, Color Accent, bool Liquid = false);
 
 /// <summary>
 /// Тема интерфейса: светлая/тёмная, основной цвет, цвет фона. Кисти подменяются в ресурсах приложения,
@@ -35,7 +35,7 @@ internal static class ThemeService
         var background = ParseOr(settings.BackgroundColor, lightTheme ? LightBackground : DarkBackground);
         var accent = ParseOr(settings.AccentColor, lightTheme ? LightAccent : DarkAccent);
         // Светлая ли поверхность — решает фактическая яркость фона: так текст читается и при своём цвете фона.
-        return new ThemePalette(Luminance(background) > 0.55, background, accent);
+        return new ThemePalette(Luminance(background) > 0.55, background, accent, settings.LiquidGlass);
     }
 
     public static void Apply(LauncherSettings settings)
@@ -103,10 +103,47 @@ internal static class ThemeService
             Set(res, "WordmarkBrightColor", Colors.White);
         }
 
+        if (palette.Liquid) ApplyLiquidGlass(res, light, bg);
+
         Applied?.Invoke(palette);
     }
 
     private static bool _applied;
+
+    /// <summary>
+    /// «Жидкое стекло»: панели получают диагональный блик (ярче в левом верхнем углу), а кромка — переливающуюся светлую
+    /// линию. Это обычные градиентные кисти: размытия и эффектов нет, поэтому лишних ресурсов не требуется.
+    /// </summary>
+    private static void ApplyLiquidGlass(ResourceDictionary res, bool light, Color bg)
+    {
+        if (light)
+        {
+            SetGradient(res, "PanelBrush", Color.FromArgb(0xC8, 255, 255, 255), Color.FromArgb(0x30, 255, 255, 255), Color.FromArgb(0x78, 255, 255, 255));
+            SetGradient(res, "PanelStrongBrush", Color.FromArgb(0xE0, 255, 255, 255), Color.FromArgb(0x50, 255, 255, 255), Color.FromArgb(0x90, 255, 255, 255));
+            SetGradient(res, "PanelBorderBrush", Color.FromArgb(0xFF, 255, 255, 255), Color.FromArgb(0x18, 0, 0, 0), Color.FromArgb(0x55, 0, 0, 0));
+            SetGradient(res, "DialogBrush", WithAlpha(Mix(bg, Colors.White, 0.85), 0xF4), WithAlpha(Mix(bg, Colors.White, 0.55), 0xEC), WithAlpha(Mix(bg, Colors.White, 0.75), 0xF2));
+        }
+        else
+        {
+            SetGradient(res, "PanelBrush", Color.FromArgb(0x38, 255, 255, 255), Color.FromArgb(0x08, 255, 255, 255), Color.FromArgb(0x1C, 255, 255, 255));
+            SetGradient(res, "PanelStrongBrush", Color.FromArgb(0x4A, 255, 255, 255), Color.FromArgb(0x10, 255, 255, 255), Color.FromArgb(0x2C, 255, 255, 255));
+            SetGradient(res, "PanelBorderBrush", Color.FromArgb(0x90, 255, 255, 255), Color.FromArgb(0x14, 255, 255, 255), Color.FromArgb(0x48, 255, 255, 255));
+            SetGradient(res, "DialogBrush", WithAlpha(Mix(bg, Colors.White, 0.12), 0xEE), WithAlpha(Mix(bg, Colors.White, 0.03), 0xEA), WithAlpha(Mix(bg, Colors.White, 0.08), 0xEE));
+        }
+    }
+
+    /// <summary>Диагональный градиент из трёх цветов: левый верхний угол → середина → правый нижний угол.</summary>
+    private static void SetGradient(ResourceDictionary res, string key, Color start, Color middle, Color end)
+    {
+        var brush = new LinearGradientBrush(new GradientStopCollection
+        {
+            new GradientStop(start, 0),
+            new GradientStop(middle, 0.55),
+            new GradientStop(end, 1)
+        }, new Point(0, 0), new Point(1, 1));
+        brush.Freeze();
+        res[key] = brush;
+    }
 
     // ----- цвета -----
 

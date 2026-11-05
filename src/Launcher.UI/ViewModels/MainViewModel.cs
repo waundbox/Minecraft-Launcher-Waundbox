@@ -28,6 +28,7 @@ internal sealed class MainViewModel : ObservableObject
         Settings = new SettingsViewModel(ctx);
 
         Developer = new DeveloperViewModel(ctx);
+        Update = new UpdateViewModel(ctx);
         _byId = new Dictionary<string, PageViewModel>
         {
             ["home"] = Home, ["profiles"] = Profiles, ["logs"] = ctx.Console,
@@ -56,6 +57,13 @@ internal sealed class MainViewModel : ObservableObject
 
         ctx.Settings.Changed += () => System.Windows.Application.Current.Dispatcher.BeginInvoke(ApplyDeveloperAndIcons);
 
+        // вкладка «Обновление» появляется, когда найдена новая версия, и исчезает, когда обновление больше не нужно
+        ctx.Updates.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(UpdateController.HasUpdate) or "")
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(() => RebuildPages(_ctx.Settings.Current));
+        };
+
         AsyncCommand.UnhandledError = ex =>
         {
             ctx.Services.Logger.Error("Необработанная ошибка в команде интерфейса.", ex);
@@ -74,6 +82,7 @@ internal sealed class MainViewModel : ObservableObject
     public ProfilesViewModel Profiles { get; }
     public SettingsViewModel Settings { get; }
     public DeveloperViewModel Developer { get; }
+    public UpdateViewModel Update { get; }
     public ObservableCollection<PageViewModel> Pages { get; }
 
     public UiContext Context => _ctx;
@@ -142,6 +151,7 @@ internal sealed class MainViewModel : ObservableObject
             ApplyDeveloperAndIcons();
             await _ctx.Catalog.ReloadAsync();
             await _ctx.Account.RefreshAsync();
+            _ = _ctx.Updates.StartAsync();
         }
         catch (Exception ex)
         {
@@ -182,6 +192,13 @@ internal sealed class MainViewModel : ObservableObject
             desired.Add(_byId[id]);
         }
 
+        // «Обновление» стоит правее «Аккаунта» (если «Аккаунт» скрыт — сразу после «Главной») и в сохранённый порядок не входит
+        if (_ctx.Updates.HasUpdate)
+        {
+            var account = desired.IndexOf(_byId["account"]);
+            desired.Insert(account >= 0 ? account + 1 : Math.Min(1, desired.Count), Update);
+        }
+
         for (var i = 0; i < desired.Count; i++)
         {
             if (i < Pages.Count && ReferenceEquals(Pages[i], desired[i])) continue;
@@ -213,13 +230,14 @@ internal sealed class MainViewModel : ObservableObject
     /// <summary>Переносит вкладку на новое место (перетаскивание в редакторе) и запоминает порядок, не трогая скрытые вкладки.</summary>
     public void MoveTab(PageViewModel page, int newIndex)
     {
+        if (ReferenceEquals(page, Update)) return;
         var from = Pages.IndexOf(page);
         if (from < 0 || newIndex < 0 || newIndex >= Pages.Count || from == newIndex) return;
         Pages.Move(from, newIndex);
         CurrentIndex = Pages.IndexOf(_current);
 
         var ids = _byId.ToDictionary(p => p.Value, p => p.Key);
-        var shown = new Queue<string>(Pages.Select(p => ids[p]));
+        var shown = new Queue<string>(Pages.Where(ids.ContainsKey).Select(p => ids[p]));
         var shownSet = shown.ToHashSet();
         var order = TabCatalog.Order(_ctx.Settings.Current.TabOrder)
             .Select(id => shownSet.Contains(id) ? shown.Dequeue() : id)
@@ -230,6 +248,7 @@ internal sealed class MainViewModel : ObservableObject
 
     public void Navigate(PageViewModel page)
     {
+        if (_ctx.Dialogs.IsLocked) return; // обязательное обновление: пока не обновились, страницы недоступны
         if (!ReferenceEquals(page, Home)) LayoutState.SetEditing(false); // режим правки относится к главной странице
         if (ReferenceEquals(page, _current)) return;
         foreach (var p in Pages) p.IsSelected = ReferenceEquals(p, page);
