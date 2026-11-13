@@ -1,0 +1,692 @@
+<UserControl x:Class="Launcher.UI.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="40,8,40,28" MaxWidth="1400">
+            <c:EditableElement Id="settings/title">
+            <TextBlock Text="Настройки" Style="{StaticResource PageTitle}" Margin="0,0,0,18" />
+            </c:EditableElement>
+            <c:EditableElement Id="settings/tabs">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                <Button Content="Общее" Margin="0,0,8,0" Command="{Binding ShowGeneralTabCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource GhostButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowGeneralTab}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="Оформление" Command="{Binding ShowCustomTabCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource GhostButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowCustomTab}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+            </c:EditableElement>
+            <Grid Visibility="{Binding ShowGeneralTab, Converter={StaticResource BoolToVis}}" c:Motion.TabFade="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+            <c:EditableElement Id="settings/look">
+            <Border Style="{StaticResource Glass}" Margin="0,0,0,16" c:Motion.Appear="True">
+                <StackPanel>
+                    <TextBlock Text="Экономия ресурсов" Style="{StaticResource SubHeading}" />
+                    <Grid Margin="0,12,0,0">
+                        <StackPanel Margin="0,0,70,0">
+                            <TextBlock Text="Экономный режим" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12.5"
+                                       Text="Отключает анимации и дым на фоне. Полезно на слабых компьютерах и от ноутбучного аккумулятора. Фон также замирает сам, пока игра запущена или окно свёрнуто." />
+                        </StackPanel>
+                        <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                      IsChecked="{Binding EcoMode, Mode=TwoWay}" />
+                    </Grid>
+                    <Grid Margin="0,14,0,0">
+                        <StackPanel Margin="0,0,70,0">
+                            <TextBlock Text="Экономия при бездействии" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap"
+                                       Text="Если в окне лаунчера 10 секунд ничего не нажимали и не двигали мышью, он сам переходит в экономный режим: анимации и вращение модели замирают. Любое движение мыши возвращает всё обратно." />
+                        </StackPanel>
+                        <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                      IsChecked="{Binding IdleEco, Mode=TwoWay}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            </c:EditableElement>
+            <c:EditableElement Id="settings/folders">
+            <Border Style="{StaticResource Glass}" Margin="0,0,0,16" c:Motion.Appear="True">
+                <StackPanel>
+                    <TextBlock Text="Папки" Style="{StaticResource SubHeading}" />
+                    <TextBlock Text="{Binding RootPath}" Style="{StaticResource Muted}" FontSize="12.5" Margin="0,6,0,12" />
+                    <WrapPanel>
+                        <Button Style="{StaticResource GhostButton}" Content="Папка лаунчера" Margin="0,0,8,8"
+                                Command="{Binding OpenLauncherFolderCommand}" />
+                        <Button Style="{StaticResource GhostButton}" Content="Файлы игры" Margin="0,0,8,8"
+                                Command="{Binding OpenGameFolderCommand}" />
+                        <Button Style="{StaticResource GhostButton}" Content="Журналы" Margin="0,0,8,8"
+                                Command="{Binding OpenLogsFolderCommand}" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+            </c:EditableElement>
+                    <c:EditableElement Id="settings/updates">
+                    <Border Style="{StaticResource Glass}" Margin="0,0,0,16" c:Motion.Appear="True">
+                        <StackPanel>
+                            <TextBlock Text="Обновления" Style="{StaticResource SubHeading}" />
+                            <Grid Margin="0,12,0,0">
+                                <StackPanel Margin="0,0,70,0">
+                                    <TextBlock Text="Проверять обновления" FontWeight="SemiBold" />
+                                    <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap"
+                                               Text="При запуске и раз в несколько часов лаунчер смотрит, не вышла ли новая версия. Если вышла, появится окно и вкладка «Обновление»." />
+                                </StackPanel>
+                                <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                              IsChecked="{Binding AutoCheckUpdates, Mode=TwoWay}" />
+                            </Grid>
+                            <Grid Margin="0,14,0,0">
+                                <TextBlock Text="{Binding Updates.LastCheckText}" Style="{StaticResource Muted}" FontSize="12.5"
+                                           TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,200,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Проверить обновления" HorizontalAlignment="Right"
+                                        Padding="14,7" FontSize="12" c:Ui.CornerRadius="11" Command="{Binding Updates.CheckNowCommand}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    </c:EditableElement>
+                    <c:EditableElement Id="settings/version">
+                    <Border Style="{StaticResource Glass}" Margin="0,0,0,16" Padding="22,16" MouseLeftButtonUp="OnVersionClick">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="{Binding VersionText}" FontWeight="SemiBold" FontSize="15" />
+                                <TextBlock Text="Лаунчер Minecraft" Style="{StaticResource Muted}" FontSize="12" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource Glyph}" Text="&#xE946;" FontSize="20" HorizontalAlignment="Right"
+                                       VerticalAlignment="Center" Foreground="{DynamicResource MutedBrush}" />
+                        </Grid>
+                    </Border>
+                    </c:EditableElement>
+            <c:EditableElement Id="settings/icons">
+            <Border Style="{StaticResource Glass}" Margin="0,0,0,16" c:Motion.Appear="True">
+                <StackPanel>
+                    <TextBlock Text="Значки профилей" Style="{StaticResource SubHeading}" />
+                    <TextBlock Style="{StaticResource Muted}" FontSize="12.5" Margin="0,6,0,10" TextWrapping="Wrap"
+                               Text="В папке значков лежат картинки (.png, .jpg), которые подхватываются автоматически. Новому профилю достаётся случайная; поменять её можно в настройках профиля (кнопка с шестерёнкой на карточке)." />
+                    <Button Style="{StaticResource GhostButton}" Content="Открыть папку значков" HorizontalAlignment="Left"
+                            Command="{Binding OpenIconsFolderCommand}" />
+                </StackPanel>
+            </Border>
+            </c:EditableElement>
+
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+            <c:EditableElement Id="settings/java">
+            <Border Style="{StaticResource Glass}" Margin="0,0,0,16" c:Motion.Appear="True">
+                <StackPanel>
+                    <Grid>
+                        <TextBlock Text="Java" Style="{StaticResource SubHeading}" VerticalAlignment="Center" />
+                        <Button Style="{StaticResource GhostButton}" Content="Найти заново" HorizontalAlignment="Right"
+                                Padding="14,7" FontSize="12" c:Ui.CornerRadius="11" Command="{Binding ScanCommand}" />
+                    </Grid>
+                    <TextBlock Style="{StaticResource Muted}" FontSize="12.5" Margin="0,6,0,10"
+                               Text="Обычно выбирать ничего не нужно: лаунчер сам подбирает подходящую Java под версию игры. Выберите вариант вручную, только если нужна конкретная." />
+                    <TextBlock Text="Ищу установленные Java…" Style="{StaticResource Muted}"
+                               Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}" />
+                    <ListBox Style="{StaticResource ChipListBox}" MaxHeight="220" ItemsSource="{Binding JavaChoices}"
+                             SelectedItem="{Binding SelectedJava, Mode=TwoWay}"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Title}" TextWrapping="Wrap" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+            </c:EditableElement>
+            <c:EditableElement Id="settings/model">
+            <Border Style="{StaticResource Glass}" Margin="0,0,0,16" c:Motion.Appear="True">
+                <StackPanel>
+                    <TextBlock Text="Модель персонажа на главной" Style="{StaticResource SubHeading}" />
+                    <Grid Margin="0,10,0,4">
+                        <StackPanel Margin="0,0,70,0">
+                            <TextBlock Text="Показывать 3D-персонажа" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap"
+                                       Text="Если выключить, модель пропадёт, нагрузка на компьютер упадёт, а панель запуска на главной встанет по центру." />
+                        </StackPanel>
+                        <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                      IsChecked="{Binding Account.ShowModel3D, Mode=TwoWay}" />
+                    </Grid>
+                    <Grid Margin="0,10,0,4">
+                        <StackPanel Margin="0,0,70,0">
+                            <TextBlock Text="Вращать персонажа" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap"
+                                       Text="Если выключить, модель стоит неподвижно (её по-прежнему можно повернуть мышью)." />
+                        </StackPanel>
+                        <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                      IsChecked="{Binding Account.ModelSpin, Mode=TwoWay}" />
+                    </Grid>
+                    <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap" Margin="0,6,0,10"
+                               Text="По умолчанию справа на главной показывается стандартная модель игрока с вашим скином. Можно подключить свою модель из Blockbench (файл .bbmodel): поддерживаются кубики с текстурой и повороты групп; анимации и меши не учитываются." />
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource PrimaryButton}" Content="Выбрать модель Blockbench…" Margin="0,0,10,8"
+                                Command="{Binding Account.ChooseModelCommand}" />
+                        <Button Style="{StaticResource GhostButton}" Content="Стандартная модель" Margin="0,0,10,8"
+                                Command="{Binding Account.ResetModelCommand}" />
+                        <Button Style="{StaticResource GhostButton}" Content="Сохранить шаблон для Blockbench…" Margin="0,0,0,8"
+                                Command="{Binding Account.ExportTemplateCommand}" />
+                    </WrapPanel>
+                    <TextBlock Text="{Binding Account.ModelNote}" Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap" Margin="0,8,0,0" />
+
+                    <Grid Margin="0,14,0,0">
+                        <StackPanel Margin="0,0,70,0">
+                            <TextBlock Text="Свой скин на своей модели" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12.5" TextWrapping="Wrap"
+                                       Text="Накладывать выбранный скин на модель из Blockbench вместо текстуры из файла. Для шаблона лаунчера это включено всегда." />
+                        </StackPanel>
+                        <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                      IsChecked="{Binding Account.ModelUseSkin, Mode=TwoWay}" />
+                    </Grid>
+
+                    <TextBlock Text="Стандартная модель: настройка" FontWeight="SemiBold" Margin="0,16,0,6" />
+                    <ListBox Style="{StaticResource ChipListBox}" ItemsSource="{Binding Account.PoseChoices}"
+                             SelectedItem="{Binding Account.SelectedPose, Mode=TwoWay}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Grid Margin="0,12,0,0">
+                        <StackPanel Margin="0,0,70,0">
+                            <TextBlock Text="Второй слой скина" />
+                            <TextBlock Style="{StaticResource Muted}" FontSize="12.5" Text="Шапка, куртка, рукава и штаны поверх основной модели." />
+                        </StackPanel>
+                        <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                      IsChecked="{Binding Account.ModelOverlay, Mode=TwoWay}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            </c:EditableElement>
+
+
+                </StackPanel>
+            </Grid>
+            <Grid Visibility="{Binding ShowCustomTab, Converter={StaticResource BoolToVis}}" c:Motion.TabFade="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+            <!-- верхний ряд: тема, расположение, свечение, жидкое стекло -->
+            <WrapPanel Grid.Row="0" Grid.ColumnSpan="5" Margin="0,0,0,4">
+                                <c:EditableElement Id="settings/theme" Width="270" Margin="0,0,12,0" VerticalAlignment="Stretch">
+                <Border Style="{StaticResource Glass}" Margin="0,0,0,12" c:Motion.Appear="True">
+                    <StackPanel>
+                    <Grid>
+                        <c:EditableElement Id="settings/theme-title"><TextBlock Text="Тема" Style="{StaticResource SubHeading}" VerticalAlignment="Center" /></c:EditableElement>
+                        <c:EditableElement Id="settings/theme-reset" HorizontalAlignment="Right"><Button Style="{StaticResource GhostButton}" Content="Обычная тема" HorizontalAlignment="Right"
+                                Padding="14,7" FontSize="12" c:Ui.CornerRadius="11" Command="{Binding ResetColorsCommand}" /></c:EditableElement>
+                    </Grid>
+
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <c:EditableElement Id="settings/theme-dark" Grid.Column="0"><Button Content="Тёмная" Height="38" Padding="0" HorizontalAlignment="Stretch" c:Ui.CornerRadius="14"
+                                Command="{Binding SelectThemeCommand}" CommandParameter="dark">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource GhostButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DarkChipActive}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button></c:EditableElement>
+                        <c:EditableElement Id="settings/theme-light" Grid.Column="2"><Button Content="Светлая" Height="38" Padding="0" HorizontalAlignment="Stretch" c:Ui.CornerRadius="14"
+                                Command="{Binding SelectThemeCommand}" CommandParameter="light">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource GhostButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LightChipActive}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button></c:EditableElement>
+                    </Grid>
+                    <c:EditableElement Id="settings/theme-presets"><Button Content="Готовые темы" Height="38" Padding="0" Margin="0,8,0,0" HorizontalAlignment="Stretch" c:Ui.CornerRadius="14"
+                            Style="{StaticResource GhostButton}" Command="{Binding OpenPresetsCommand}" /></c:EditableElement>
+
+                    </StackPanel>
+                </Border>
+                </c:EditableElement>
+                <c:EditableElement Id="settings/navlayout" Width="270" Margin="0,0,12,0" VerticalAlignment="Stretch">
+                <Border Style="{StaticResource Glass}" Margin="0,0,0,12" c:Motion.Appear="True">
+                    <StackPanel>
+                    <c:EditableElement Id="settings/nav-title"><TextBlock Text="Расположение интерфейса" Style="{StaticResource SubHeading}" TextWrapping="Wrap" /></c:EditableElement>
+                    <c:EditableElement Id="settings/nav-hint"><TextBlock Style="{StaticResource Muted}" FontSize="11.5" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Text="Меню сверху или слева: слева оно узкое, а когда подводишь мышь, выезжает с названиями. Картинки в «Готовых темах» подстраиваются под выбор." /></c:EditableElement>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" /><ColumnDefinition Width="6" /><ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <c:EditableElement Id="settings/nav-top" Grid.Column="0"><Button Content="Сверху" Height="34" Padding="0" HorizontalAlignment="Stretch" c:Ui.CornerRadius="12" FontSize="12"
+                                Command="{Binding SetNavLayoutCommand}" CommandParameter="top">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource GhostButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding NavTopActive}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button></c:EditableElement>
+                        <c:EditableElement Id="settings/nav-side" Grid.Column="2"><Button Content="Слева" Height="34" Padding="0" HorizontalAlignment="Stretch" c:Ui.CornerRadius="12" FontSize="12"
+                                Command="{Binding SetNavLayoutCommand}" CommandParameter="side">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource GhostButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding NavSideActive}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button></c:EditableElement>
+                    </Grid>
+                    <c:EditableElement Id="settings/nav-editor" HorizontalAlignment="Left"><Button Style="{StaticResource GhostButton}" Content="Открыть редактор интерфейса" Padding="14,7" FontSize="12" c:Ui.CornerRadius="11"
+                            HorizontalAlignment="Left" Margin="0,10,0,0" Command="{Binding MakeOwnThemeCommand}" /></c:EditableElement>
+                    <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="Правки раскладки запоминаются под выбранной темой." />
+                    </StackPanel>
+                </Border>
+                </c:EditableElement>
+                <c:EditableElement Id="settings/glow" Width="290" Margin="0,0,12,0" VerticalAlignment="Stretch">
+                <Border Style="{StaticResource Glass}" Margin="0,0,0,12" c:Motion.Appear="True">
+                    <StackPanel>
+                        <Grid>
+                            <StackPanel Margin="0,0,64,0">
+                                <c:EditableElement Id="settings/glow-title"><TextBlock Text="Свечение" Style="{StaticResource SubHeading}" /></c:EditableElement>
+                                <TextBlock Style="{StaticResource Muted}" FontSize="11.5" TextWrapping="Wrap" Margin="0,4,0,0"
+                                           Text="Мягкий «дым» позади окна. Выключите, чтобы фон был ровным и не тратил ресурсы." />
+                            </StackPanel>
+                            <c:EditableElement Id="settings/glow-switch" HorizontalAlignment="Right"><ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                          IsChecked="{Binding BackgroundGlow, Mode=TwoWay}" /></c:EditableElement>
+                        </Grid>
+                        <Rectangle Height="1" Fill="{DynamicResource PanelBorderBrush}" Margin="0,14,0,14" />
+                        <Grid>
+                            <StackPanel Margin="0,0,64,0">
+                                <c:EditableElement Id="settings/liquid-title"><TextBlock Text="Жидкое стекло" Style="{StaticResource SubHeading}" /></c:EditableElement>
+                                <TextBlock Style="{StaticResource Muted}" FontSize="11.5" TextWrapping="Wrap" Margin="0,4,0,0"
+                                           Text="Блик и светлая кромка на панелях. Только оформление, нагрузки нет." />
+                            </StackPanel>
+                            <c:EditableElement Id="settings/liquid-switch" HorizontalAlignment="Right"><ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                          IsChecked="{Binding LiquidGlass, Mode=TwoWay}" /></c:EditableElement>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                </c:EditableElement>
+            </WrapPanel>
+
+                <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,0,0">
+                <c:EditableElement Id="settings/accent" VerticalAlignment="Stretch">
+                <Border Style="{StaticResource Glass}" Margin="0,0,0,12" c:Motion.Appear="True">
+                    <StackPanel>
+                    <c:EditableElement Id="settings/accent-title"><TextBlock Text="Основной цвет" Style="{StaticResource SubHeading}" Margin="0,0,0,10" /></c:EditableElement>
+                    <c:EditableElement Id="settings/accent-swatches"><ItemsControl ItemsSource="{Binding AccentSwatches}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Width="30" Height="30" Margin="0,0,8,8" Cursor="Hand" ToolTip="{Binding Hex}"
+                                        Command="{Binding DataContext.SetAccentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding Hex}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Ellipse Fill="{Binding Brush}" Stroke="{DynamicResource PanelBorderBrush}" StrokeThickness="1.5" />
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl></c:EditableElement>
+                    <c:EditableElement Id="settings/accent-wheel" HorizontalAlignment="Left"><c:ColorWheel Width="220" HorizontalAlignment="Left" Margin="0,4,0,12"
+                                  Hex="{Binding AccentText, Delay=80}" /></c:EditableElement>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding AccentText, UpdateSourceTrigger=PropertyChanged}" MaxLength="7" />
+                        <TextBlock Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Style="{StaticResource Muted}"
+                                   FontSize="11" Text="Круг, образец или #RRGGBB." />
+                    </Grid>
+                    <TextBlock Foreground="{DynamicResource DangerBrush}" FontSize="12" Margin="0,-4,0,8"
+                               Text="Некорректная запись цвета: нужно #RRGGBB."
+                               Visibility="{Binding AccentTextInvalid, Converter={StaticResource BoolToVis}}" />
+
+                    </StackPanel>
+                </Border>
+                </c:EditableElement>
+                </Grid>
+                <Grid Grid.Row="1" Grid.Column="2">
+                <c:EditableElement Id="settings/panelcolor" VerticalAlignment="Stretch">
+                <Border Style="{StaticResource Glass}" Margin="0,0,0,12" c:Motion.Appear="True">
+                    <StackPanel>
+                    <Grid Margin="0,0,0,6">
+                        <c:EditableElement Id="settings/panel-title"><TextBlock Text="Фон виджетов" Style="{StaticResource SubHeading}" VerticalAlignment="Center" /></c:EditableElement>
+                        <c:EditableElement Id="settings/panel-reset" HorizontalAlignment="Right"><Button Style="{StaticResource GhostButton}" Content="По умолчанию" HorizontalAlignment="Right"
+                                Padding="14,7" FontSize="12" c:Ui.CornerRadius="11" Command="{Binding ResetPanelCommand}" /></c:EditableElement>
+                    </Grid>
+                    <Grid Margin="0,10,0,0" />
+                    <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"
+                               Text="Цвет панелей и окон, полупрозрачный." />
+                    <c:EditableElement Id="settings/panel-swatches"><ItemsControl ItemsSource="{Binding PanelSwatches}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Width="30" Height="30" Margin="0,0,8,8" Cursor="Hand" ToolTip="{Binding Hex}"
+                                        Command="{Binding DataContext.SetPanelCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding Hex}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Ellipse Fill="{Binding Brush}" Stroke="{DynamicResource PanelBorderBrush}" StrokeThickness="1.5" />
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl></c:EditableElement>
+                    <c:EditableElement Id="settings/panel-wheel" HorizontalAlignment="Left"><c:ColorWheel Width="220" HorizontalAlignment="Left" Margin="0,4,0,12"
+                                  Hex="{Binding PanelText, Delay=80}" /></c:EditableElement>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding PanelText, UpdateSourceTrigger=PropertyChanged}" MaxLength="7" />
+                        <TextBlock Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Style="{StaticResource Muted}"
+                                   FontSize="12" TextWrapping="Wrap"
+                                   Text="Круг, образец или #RRGGBB." />
+                    </Grid>
+                    <TextBlock Foreground="{DynamicResource DangerBrush}" FontSize="12" Margin="0,6,0,0"
+                               Text="Некорректная запись цвета: нужно #RRGGBB."
+                               Visibility="{Binding PanelTextInvalid, Converter={StaticResource BoolToVis}}" />
+                    </StackPanel>
+                </Border>
+                </c:EditableElement>
+                </Grid>
+                <Grid Grid.Row="1" Grid.Column="4">
+                <c:EditableElement Id="settings/background" VerticalAlignment="Stretch">
+                <Border Style="{StaticResource Glass}" Margin="0,0,0,12" c:Motion.Appear="True">
+                    <StackPanel>
+                    <c:EditableElement Id="settings/bg-title"><TextBlock Text="Фон" Style="{StaticResource SubHeading}" Margin="0,0,0,10" /></c:EditableElement>
+                    <c:EditableElement Id="settings/bg-swatches"><ItemsControl ItemsSource="{Binding BackgroundSwatches}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Width="30" Height="30" Margin="0,0,8,8" Cursor="Hand" ToolTip="{Binding Hex}"
+                                        Command="{Binding DataContext.SetBackgroundCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding Hex}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Ellipse Fill="{Binding Brush}" Stroke="{DynamicResource PanelBorderBrush}" StrokeThickness="1.5" />
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl></c:EditableElement>
+                    <c:EditableElement Id="settings/bg-wheel" HorizontalAlignment="Left"><c:ColorWheel Width="220" HorizontalAlignment="Left" Margin="0,4,0,12"
+                                  Hex="{Binding BackgroundText, Delay=80}" /></c:EditableElement>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding BackgroundText, UpdateSourceTrigger=PropertyChanged}" MaxLength="7" />
+                        <TextBlock Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Style="{StaticResource Muted}"
+                                   FontSize="11" TextWrapping="Wrap"
+                                   Text="Текст подстраивается под яркость фона. Смена темы сбрасывает фон." />
+                    </Grid>
+                    <TextBlock Foreground="{DynamicResource DangerBrush}" FontSize="12" Margin="0,6,0,0"
+                               Text="Некорректная запись цвета: нужно #RRGGBB."
+                               Visibility="{Binding BackgroundTextInvalid, Converter={StaticResource BoolToVis}}" />
+
+                    </StackPanel>
+                </Border>
+                </c:EditableElement>
+                </Grid>
+                        </Grid>
+            <StackPanel Visibility="{Binding ShowPresetsTab, Converter={StaticResource BoolToVis}}" c:Motion.TabFade="True">
+                <c:EditableElement Id="settings/presets-back">
+                <Grid Margin="0,0,0,14">
+                    <Button Style="{StaticResource GhostButton}" Content="‹  К оформлению" HorizontalAlignment="Left" Padding="14,7" FontSize="12.5"
+                            c:Ui.CornerRadius="12" Command="{Binding BackFromPresetsCommand}" />
+                    <Button Style="{StaticResource PrimaryButton}" Content="Сделать свою тему" HorizontalAlignment="Right"
+                            Padding="14,7" FontSize="12.5" c:Ui.CornerRadius="12" Command="{Binding MakeOwnThemeCommand}"
+                            ToolTip="Открыть редактор: настройте внешний вид и нажмите «Сохранить тему»" />
+                </Grid>
+                </c:EditableElement>
+                <TextBlock Text="Готовые темы" Style="{StaticResource SubHeading}" Foreground="{DynamicResource PageTitleBrush}" Margin="4,0,0,2" />
+                <TextBlock Style="{StaticResource PageSubtitle}" FontSize="12" TextWrapping="Wrap" Margin="4,0,0,12"
+                           Text="Нажмите на картинку, чтобы примерить тему, затем «Принять» или «Отмена». Картинки показывают, как будет выглядеть лаунчер в текущем режиме." />
+                <WrapPanel>
+                    <c:EditableElement Id="settings/theme-sky" Width="400" VerticalAlignment="Top">
+                    <Border Style="{StaticResource Glass}" Margin="0,0,12,12" Padding="12" DataContext="{Binding Presets[0]}" c:Motion.Appear="True">
+                        <StackPanel>
+                            <Button Style="{StaticResource GhostButton}" Padding="0" c:Ui.CornerRadius="14" HorizontalContentAlignment="Stretch"
+                                    Command="{Binding DataContext.PreviewPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Border Height="233" CornerRadius="13" ClipToBounds="True" Background="{Binding Backdrop}">
+                                    <Image Source="{Binding Overlay}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" />
+                                </Border>
+                            </Button>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="4,10,0,0" />
+                            <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="11.5" Margin="4,2,0,0" TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsPending, Converter={StaticResource BoolToVis}}">
+                                <Button Style="{StaticResource PrimaryButton}" Content="Принять" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Margin="0,0,8,0" Command="{Binding DataContext.AcceptPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Style="{StaticResource GhostButton}" Content="Отмена" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Command="{Binding DataContext.CancelPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    </c:EditableElement>
+                    <c:EditableElement Id="settings/theme-cozy" Width="400" VerticalAlignment="Top">
+                    <Border Style="{StaticResource Glass}" Margin="0,0,12,12" Padding="12" DataContext="{Binding Presets[1]}" c:Motion.Appear="True">
+                        <StackPanel>
+                            <Button Style="{StaticResource GhostButton}" Padding="0" c:Ui.CornerRadius="14" HorizontalContentAlignment="Stretch"
+                                    Command="{Binding DataContext.PreviewPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Border Height="233" CornerRadius="13" ClipToBounds="True" Background="{Binding Backdrop}">
+                                    <Image Source="{Binding Overlay}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" />
+                                </Border>
+                            </Button>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="4,10,0,0" />
+                            <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="11.5" Margin="4,2,0,0" TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsPending, Converter={StaticResource BoolToVis}}">
+                                <Button Style="{StaticResource PrimaryButton}" Content="Принять" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Margin="0,0,8,0" Command="{Binding DataContext.AcceptPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Style="{StaticResource GhostButton}" Content="Отмена" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Command="{Binding DataContext.CancelPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    </c:EditableElement>
+                    <c:EditableElement Id="settings/theme-forest" Width="400" VerticalAlignment="Top">
+                    <Border Style="{StaticResource Glass}" Margin="0,0,12,12" Padding="12" DataContext="{Binding Presets[2]}" c:Motion.Appear="True">
+                        <StackPanel>
+                            <Button Style="{StaticResource GhostButton}" Padding="0" c:Ui.CornerRadius="14" HorizontalContentAlignment="Stretch"
+                                    Command="{Binding DataContext.PreviewPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Border Height="233" CornerRadius="13" ClipToBounds="True" Background="{Binding Backdrop}">
+                                    <Image Source="{Binding Overlay}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" />
+                                </Border>
+                            </Button>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="4,10,0,0" />
+                            <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="11.5" Margin="4,2,0,0" TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsPending, Converter={StaticResource BoolToVis}}">
+                                <Button Style="{StaticResource PrimaryButton}" Content="Принять" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Margin="0,0,8,0" Command="{Binding DataContext.AcceptPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Style="{StaticResource GhostButton}" Content="Отмена" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Command="{Binding DataContext.CancelPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    </c:EditableElement>
+                    <c:EditableElement Id="settings/theme-sakura" Width="400" VerticalAlignment="Top">
+                    <Border Style="{StaticResource Glass}" Margin="0,0,12,12" Padding="12" DataContext="{Binding Presets[3]}" c:Motion.Appear="True">
+                        <StackPanel>
+                            <Button Style="{StaticResource GhostButton}" Padding="0" c:Ui.CornerRadius="14" HorizontalContentAlignment="Stretch"
+                                    Command="{Binding DataContext.PreviewPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Border Height="233" CornerRadius="13" ClipToBounds="True" Background="{Binding Backdrop}">
+                                    <Image Source="{Binding Overlay}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" />
+                                </Border>
+                            </Button>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="4,10,0,0" />
+                            <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="11.5" Margin="4,2,0,0" TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsPending, Converter={StaticResource BoolToVis}}">
+                                <Button Style="{StaticResource PrimaryButton}" Content="Принять" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Margin="0,0,8,0" Command="{Binding DataContext.AcceptPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Style="{StaticResource GhostButton}" Content="Отмена" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Command="{Binding DataContext.CancelPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    </c:EditableElement>
+                    <c:EditableElement Id="settings/theme-silk" Width="400" VerticalAlignment="Top">
+                    <Border Style="{StaticResource Glass}" Margin="0,0,12,12" Padding="12" DataContext="{Binding Presets[4]}" c:Motion.Appear="True">
+                        <StackPanel>
+                            <Button Style="{StaticResource GhostButton}" Padding="0" c:Ui.CornerRadius="14" HorizontalContentAlignment="Stretch"
+                                    Command="{Binding DataContext.PreviewPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Border Height="233" CornerRadius="13" ClipToBounds="True" Background="{Binding Backdrop}">
+                                    <Image Source="{Binding Overlay}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" />
+                                </Border>
+                            </Button>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="4,10,0,0" />
+                            <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="11.5" Margin="4,2,0,0" TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsPending, Converter={StaticResource BoolToVis}}">
+                                <Button Style="{StaticResource PrimaryButton}" Content="Принять" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Margin="0,0,8,0" Command="{Binding DataContext.AcceptPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Style="{StaticResource GhostButton}" Content="Отмена" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Command="{Binding DataContext.CancelPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    </c:EditableElement>
+                    <c:EditableElement Id="settings/theme-plain" Width="400" VerticalAlignment="Top">
+                    <Border Style="{StaticResource Glass}" Margin="0,0,12,12" Padding="12" DataContext="{Binding Presets[5]}" c:Motion.Appear="True">
+                        <StackPanel>
+                            <Button Style="{StaticResource GhostButton}" Padding="0" c:Ui.CornerRadius="14" HorizontalContentAlignment="Stretch"
+                                    Command="{Binding DataContext.PreviewPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Border Height="233" CornerRadius="13" ClipToBounds="True" Background="{Binding Backdrop}">
+                                    <Image Source="{Binding Overlay}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" />
+                                </Border>
+                            </Button>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="4,10,0,0" />
+                            <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="11.5" Margin="4,2,0,0" TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsPending, Converter={StaticResource BoolToVis}}">
+                                <Button Style="{StaticResource PrimaryButton}" Content="Принять" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Margin="0,0,8,0" Command="{Binding DataContext.AcceptPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Style="{StaticResource GhostButton}" Content="Отмена" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Command="{Binding DataContext.CancelPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    </c:EditableElement>
+                </WrapPanel>
+                    <c:EditableElement Id="settings/theme-folder" Margin="0,10,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Мои темы" Style="{StaticResource SubHeading}" Foreground="{DynamicResource PageTitleBrush}" Margin="4,0,0,2" />
+                        <TextBlock Style="{StaticResource PageSubtitle}" FontSize="12" TextWrapping="Wrap" Margin="4,0,0,12"
+                                   Text="Темы из папки themes: ваши сохранённые и добавленные вручную." />
+                        <TextBlock Style="{StaticResource PageSubtitle}" FontSize="12.5" TextWrapping="Wrap" Margin="4,0,0,12"
+                                   Text="Пока своих тем нет. Нажмите «Сделать свою тему» вверху, настройте вид в редакторе и сохраните."
+                                   Visibility="{Binding HasNoFolderPresets, Converter={StaticResource BoolToVis}}" />
+                        <ItemsControl ItemsSource="{Binding FolderPresets}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="400">
+                                    <Border Style="{StaticResource Glass}" Margin="0,0,12,12" Padding="12">
+                                        <StackPanel>
+                            <Button Style="{StaticResource GhostButton}" Padding="0" c:Ui.CornerRadius="14" HorizontalContentAlignment="Stretch"
+                                    Command="{Binding DataContext.PreviewPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Border Height="233" CornerRadius="13" ClipToBounds="True" Background="{Binding Backdrop}">
+                                    <Image Source="{Binding Overlay}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" />
+                                </Border>
+                            </Button>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="4,10,0,0" />
+                            <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="11.5" Margin="4,2,0,0" TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsPending, Converter={StaticResource BoolToVis}}">
+                                <Button Style="{StaticResource PrimaryButton}" Content="Принять" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Margin="0,0,8,0" Command="{Binding DataContext.AcceptPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Button Style="{StaticResource GhostButton}" Content="Отмена" Padding="16,7" FontSize="12.5" c:Ui.CornerRadius="12"
+                                        Command="{Binding DataContext.CancelPresetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </StackPanel>
+                        </StackPanel>
+                                    </Border>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Style="{StaticResource PageSubtitle}" FontSize="12.5" TextWrapping="Wrap" Margin="4,0,0,10"
+                                   Text="Можно положить папку с темой (theme.json и картинка) в папку themes вручную — тема появится здесь после повторного открытия окна тем." />
+                        <Button Style="{StaticResource GhostButton}" Content="Открыть папку themes" Padding="14,8" FontSize="12.5" c:Ui.CornerRadius="12"
+                                HorizontalAlignment="Left" Margin="4,0,0,12" Command="{Binding OpenThemesFolderCommand}" />
+                    </StackPanel>
+                    </c:EditableElement>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

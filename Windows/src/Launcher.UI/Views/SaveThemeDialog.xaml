@@ -1,0 +1,27 @@
+<UserControl x:Class="Launcher.UI.Views.SaveThemeDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls">
+    <StackPanel Margin="22">
+        <TextBlock Text="Сохранить тему" Style="{StaticResource Heading}" />
+        <TextBlock Style="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
+                   Text="Создаст папку с этим названием в themes и положит туда все настройки оформления: вариант, цвета, картинку, затемнение, жидкое стекло и раскладку. Потом тему можно выбрать в «Настройки → Оформление»." />
+        <TextBlock Text="Название (до 16 символов, обязательно)" Style="{StaticResource Muted}" FontSize="11.5" Margin="0,14,0,2" />
+        <TextBox Text="{Binding ThemeName, UpdateSourceTrigger=PropertyChanged}" MaxLength="16" />
+        <TextBlock Text="Описание (необязательно)" Style="{StaticResource Muted}" FontSize="11.5" Margin="0,10,0,2" />
+        <TextBox Text="{Binding ThemeDescription, UpdateSourceTrigger=PropertyChanged}" MaxLength="120" />
+        <TextBlock Text="Цвет текста (необязательно)" Style="{StaticResource Muted}" FontSize="11.5" Margin="0,10,0,2" />
+        <TextBox Text="{Binding ThemeTextColor, UpdateSourceTrigger=PropertyChanged}" MaxLength="7" />
+        <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0"
+                   Text="#RRGGBB. Если не указать, цвет текста подбирается автоматически под тему." />
+        <TextBlock Foreground="{DynamicResource DangerBrush}" FontSize="11.5" Margin="0,4,0,0" TextWrapping="Wrap"
+                   Text="Цвет текста: нужно #RRGGBB."
+                   Visibility="{Binding ThemeTextInvalid, Converter={StaticResource BoolToVis}}" />
+        <TextBlock Foreground="{DynamicResource DangerBrush}" FontSize="11.5" Margin="0,8,0,0" TextWrapping="Wrap"
+                   Text="{Binding ThemeMessage}" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Style="{StaticResource GhostButton}" Content="Отмена" Margin="0,0,10,0" IsCancel="True" />
+            <Button Style="{StaticResource PrimaryButton}" Content="Сохранить" IsDefault="True" Command="{Binding SaveThemeCommand}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

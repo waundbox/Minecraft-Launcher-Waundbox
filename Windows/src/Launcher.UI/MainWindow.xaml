@@ -1,0 +1,289 @@
+<Window x:Class="Launcher.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        xmlns:c="clr-namespace:Launcher.UI.Controls"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        Title="Waundbox" Width="1080" Height="690" MinWidth="900" MinHeight="580"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Background="{DynamicResource BackgroundBrush}" Foreground="{DynamicResource TextBrush}"
+        FontFamily="{StaticResource UiFont}" FontSize="14"
+        TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True" SnapsToDevicePixels="True">
+
+    <Window.Resources>
+        <!-- размеры верхней панели: пересчитываются из кода по ширине окна (без масштабирующего преобразования — текст остаётся чётким) -->
+        <system:Double x:Key="TopFont">13</system:Double>
+        <system:Double x:Key="TopHead">24</system:Double>
+        <system:Double x:Key="TabHeight">38</system:Double>
+        <system:Double x:Key="TabFont">13.5</system:Double>
+        <system:Double x:Key="TabGlyph">15</system:Double>
+        <Thickness x:Key="TabPadding">16,9,16,9</Thickness>
+        <Style x:Key="SideTab" TargetType="Button" BasedOn="{StaticResource NavTab}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                            </Trigger>
+                            <Trigger Property="c:Ui.IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="52" ResizeBorderThickness="6" GlassFrameThickness="0"
+                            CornerRadius="0" UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+Right" Command="{Binding NextCommand}" />
+        <KeyBinding Gesture="Ctrl+Left" Command="{Binding PreviousCommand}" />
+        <KeyBinding Key="Escape" Command="{Binding CloseDialogCommand}" />
+    </Window.InputBindings>
+
+    <Grid x:Name="Root">
+        <c:SmokeBackground x:Name="Smoke" />
+
+        <!-- Своё фоновое изображение (из редактора) и его затемнение -->
+        <Image x:Name="BgImage" Stretch="UniformToFill" IsHitTestVisible="False" Visibility="Collapsed"
+               RenderOptions.BitmapScalingMode="HighQuality" />
+        <Rectangle x:Name="BgDim" Fill="Black" IsHitTestVisible="False" Visibility="Collapsed" />
+
+        <!-- Панель сверху: стекло с лёгким размытием, чтобы вкладки не сливались с картинкой -->
+        <Border x:Name="TopBar" VerticalAlignment="Top" Height="52" ClipToBounds="True" IsHitTestVisible="False"
+                BorderBrush="{DynamicResource TopBarBorderBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Image x:Name="TopBlurImage" VerticalAlignment="Top" Stretch="UniformToFill" Visibility="Collapsed"
+                       Height="{Binding ActualHeight, ElementName=Root}" RenderOptions.BitmapScalingMode="LowQuality">
+                    <Image.Effect>
+                        <BlurEffect Radius="7" KernelType="Gaussian" RenderingBias="Performance" />
+                    </Image.Effect>
+                </Image>
+                <Rectangle Fill="{DynamicResource TopBarBrush}" />
+            </Grid>
+        </Border>
+
+        <Grid x:Name="Shell">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="SideCol" Width="0" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Меню слева (если выбрано в настройках или редакторе) -->
+        <Border x:Name="SideBar" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="58" Panel.ZIndex="5" Visibility="Collapsed" ClipToBounds="True"
+                BorderBrush="{DynamicResource TopBarBorderBrush}" BorderThickness="0,0,1,0">
+            <Grid>
+            <!-- тот же вид, что у верхней панели: размытая копия фона и цвет TopBarBrush -->
+            <Image x:Name="SideBlurImage" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="UniformToFill" Visibility="Collapsed"
+                   Width="{Binding ActualWidth, ElementName=Root}" Height="{Binding ActualHeight, ElementName=Root}"
+                   RenderOptions.BitmapScalingMode="LowQuality" IsHitTestVisible="False">
+                <Image.Effect>
+                    <BlurEffect Radius="7" KernelType="Gaussian" RenderingBias="Performance" />
+                </Image.Effect>
+            </Image>
+            <Rectangle Fill="{DynamicResource TopBarBrush}" />
+            <StackPanel Width="140" HorizontalAlignment="Left" Margin="8,8,8,8" IsEnabled="{Binding Dialogs.IsUnlocked}">
+                <Button Style="{StaticResource GhostButton}" Padding="6,5" c:Ui.CornerRadius="12" Background="Transparent" BorderThickness="0"
+                        HorizontalContentAlignment="Left" shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                        Command="{Binding NavigateCommand}" CommandParameter="{Binding Account}" ToolTip="{Binding Account.DisplayName}">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="28" Height="28" CornerRadius="5" Background="{DynamicResource AccentSoftBrush}" ClipToBounds="True">
+                            <Image Source="{Binding Account.HeadImage}" Stretch="Fill" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        </Border>
+                        <TextBlock Text="{Binding Account.DisplayName}" Margin="9,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="13"
+                                   TextTrimming="CharacterEllipsis" MaxWidth="96"  />
+                    </StackPanel>
+                </Button>
+                <ItemsControl ItemsSource="{Binding Pages}" Margin="0,14,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="SideBg" CornerRadius="10" Margin="0,0,0,4" Background="Transparent">
+                                <Button Style="{StaticResource SideTab}" Padding="10,9" shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                                        c:Ui.IsSelected="{Binding IsSelected}" ToolTip="{Binding Title}"
+                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <c:PageIcon Glyph="{Binding Glyph}" IconData="{Binding IconData}" Size="16" Width="22" />
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" Margin="10,0,0,0" VerticalAlignment="Center"
+                                                    />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter TargetName="SideBg" Property="Background" Value="{DynamicResource NavActiveBrush}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="TopRow" Height="52" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Верхняя панель: аккаунт · вкладки · кнопки окна -->
+            <Grid Grid.Row="0" Margin="14,0,8,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Button x:Name="AccountButton" VerticalAlignment="Center"
+                            Style="{StaticResource GhostButton}" Padding="8,5,14,5" c:Ui.CornerRadius="17"
+                            Background="Transparent" BorderThickness="0"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                            IsEnabled="{Binding Dialogs.IsUnlocked}"
+                            Command="{Binding NavigateCommand}" CommandParameter="{Binding Account}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="{DynamicResource TopHead}" Height="{DynamicResource TopHead}" CornerRadius="4" Background="{DynamicResource AccentSoftBrush}" ClipToBounds="True" SnapsToDevicePixels="True">
+                                <Image Source="{Binding Account.HeadImage}" Stretch="Fill"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                            </Border>
+                            <TextBlock Text="{Binding Account.DisplayName}" Margin="9,0,0,0" VerticalAlignment="Center"
+                                       FontWeight="SemiBold" FontSize="{DynamicResource TopFont}" />
+                        </StackPanel>
+                    </Button>
+                    <!-- Кнопка обновления: видна, только когда найдена новая версия (или обновление обязательно) -->
+                    <Button x:Name="UpdateButton" Margin="8,0,0,0" VerticalAlignment="Center" Padding="11,5,13,5" c:Ui.CornerRadius="17"
+                            Style="{StaticResource GhostButton}" Background="{DynamicResource AccentSoftBrush}" BorderThickness="0"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Доступно обновление лаунчера"
+                            Command="{Binding Updates.ShowDialogCommand}"
+                            Visibility="{Binding Updates.HasUpdate, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Glyph}" Text="&#xE895;" FontSize="{DynamicResource TabGlyph}"
+                                       Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                            <TextBlock x:Name="UpdateLabel" Text="Обновление" Margin="7,0,0,0" FontWeight="SemiBold"
+                                       FontSize="{DynamicResource TopFont}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <Grid Grid.Column="1" x:Name="TabsHost" VerticalAlignment="Center" Height="{DynamicResource TabHeight}"
+                      IsEnabled="{Binding Dialogs.IsUnlocked}">
+                    <Border x:Name="NavIndicator" HorizontalAlignment="Left" Height="{DynamicResource TabHeight}" Width="0" CornerRadius="10"
+                            Background="{DynamicResource NavActiveBrush}" IsHitTestVisible="False">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="IndicatorMove" />
+                        </Border.RenderTransform>
+                    </Border>
+                    <ItemsControl x:Name="Tabs" ItemsSource="{Binding Pages}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource NavTab}" Padding="{DynamicResource TabPadding}"
+                                        shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                                        c:Ui.IsSelected="{Binding IsSelected}"
+                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <c:PageIcon Glyph="{Binding Glyph}" IconData="{Binding IconData}" Size="{DynamicResource TabGlyph}" Margin="0,0,8,0" />
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="{DynamicResource TabFont}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="MinButton" Style="{StaticResource WindowButton}" Content="&#xE921;" Click="OnMinimize"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Свернуть" />
+                    <Button x:Name="MaxButton" Style="{StaticResource WindowButton}" Content="&#xE922;" Click="OnMaximize"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Развернуть" />
+                    <Button Style="{StaticResource CloseWindowButton}" Content="&#xE8BB;" Click="OnClose"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Закрыть" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Страницы с переходами и свайпом -->
+            <c:PageHost x:Name="Host" Grid.Row="1" Pages="{Binding Pages}" Current="{Binding Current}"
+                        IsEnabled="{Binding Dialogs.IsUnlocked}" />
+
+            <!-- Сетка редактора: одна на все страницы (кроме разработчика, где режима правки нет) -->
+            <c:EditorGrid Grid.Row="1" />
+        </Grid>
+        </Grid>
+
+        <!-- Уведомления -->
+        <ItemsControl ItemsSource="{Binding Toasts.Items}" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                      Margin="0,0,0,26" IsHitTestVisible="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{DynamicResource DialogBrush}" BorderBrush="{DynamicResource PanelBorderBrush}"
+                            BorderThickness="1" CornerRadius="14" Padding="16,11" Margin="0,6,0,0" MaxWidth="560"
+                            c:Motion.Appear="True">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="Icon" Style="{StaticResource Glyph}" Text="{Binding Glyph}"
+                                       Foreground="{DynamicResource AccentBrush}" Margin="0,0,12,0" VerticalAlignment="Top" />
+                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" MaxWidth="480" />
+                        </StackPanel>
+                    </Border>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Kind}" Value="Error">
+                            <Setter TargetName="Icon" Property="Foreground" Value="{DynamicResource DangerBrush}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Kind}" Value="Warning">
+                            <Setter TargetName="Icon" Property="Foreground" Value="{DynamicResource WarnBrush}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Kind}" Value="Info">
+                            <Setter TargetName="Icon" Property="Foreground" Value="{DynamicResource TextBrush}" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Диалоги -->
+        <Grid x:Name="DialogLayer" Visibility="Collapsed">
+            <Border x:Name="Scrim" Background="{DynamicResource ScrimBrush}" />
+            <Border x:Name="DialogCard" Background="{DynamicResource DialogBrush}"
+                    BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" CornerRadius="22"
+                    Padding="26,24,14,24" Margin="24"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Width" Value="560" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Dialogs.IsWide}" Value="True">
+                                <Setter Property="Width" Value="860" />
+                                <Setter Property="MinHeight" Value="470" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Border.RenderTransform>
+                    <ScaleTransform x:Name="DialogScale" />
+                </Border.RenderTransform>
+                <ContentControl Content="{Binding Dialogs.Current}" Focusable="False" />
+            </Border>
+        </Grid>
+
+        <!-- Счётчик кадров (вкладка разработчика) -->
+        <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="14" Padding="10,5" CornerRadius="9"
+                Background="#B3000000" IsHitTestVisible="False" Panel.ZIndex="100"
+                Visibility="{Binding ShowFps, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{Binding FpsText}" Foreground="#FFFFFF" FontFamily="Consolas" FontSize="12" />
+        </Border>
+    </Grid>
+</Window>

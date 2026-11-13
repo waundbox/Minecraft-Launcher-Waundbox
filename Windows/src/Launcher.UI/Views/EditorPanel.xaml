@@ -1,0 +1,261 @@
+<UserControl x:Class="Launcher.UI.Views.EditorPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Launcher.UI.Controls">
+                <Border Padding="18">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+                <TextBlock Text="Редактор интерфейса" Style="{StaticResource SubHeading}" />
+                <TextBlock Text="{Binding PageTitle, StringFormat='Страница: {0}'}" Style="{StaticResource Muted}" FontSize="12" Margin="0,2,0,0" />
+
+                <Border Style="{StaticResource Glass}" Padding="12" Margin="0,10,0,0" CornerRadius="12">
+                    <StackPanel>
+                        <TextBlock Text="Страницы и вкладки" FontSize="12.5" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,6"
+                                   Text="Переходите по страницам кнопками: правка работает на каждой, а у настроек — на каждой вкладке." />
+                        <ListBox Style="{StaticResource ChipListBox}" ItemsSource="{Binding PageButtons}"
+                                 SelectedItem="{Binding CurrentPageButton, Mode=TwoWay}">
+                            <ListBox.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" FontSize="12" /></DataTemplate></ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Visibility="{Binding IsAccountPage, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Вкладки аккаунта" Style="{StaticResource Muted}" FontSize="11.5" Margin="0,8,0,2" />
+                            <ListBox Style="{StaticResource ChipListBox}" ItemsSource="{Binding AccountTabButtons}"
+                                     SelectedItem="{Binding CurrentAccountTab, Mode=TwoWay}">
+                                <ListBox.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" FontSize="12" /></DataTemplate></ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                        <StackPanel Visibility="{Binding IsSettingsPage, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Вкладки настроек" Style="{StaticResource Muted}" FontSize="11.5" Margin="0,8,0,2" />
+                            <ListBox Style="{StaticResource ChipListBox}" ItemsSource="{Binding SettingsTabButtons}"
+                                     SelectedItem="{Binding CurrentSettingsTab, Mode=TwoWay}">
+                                <ListBox.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" FontSize="12" /></DataTemplate></ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Glass}" Padding="12" Margin="0,10,0,0" CornerRadius="12">
+                    <StackPanel>
+                        <Grid>
+                            <StackPanel Margin="0,0,64,0">
+                                <TextBlock Text="3D-модель на главной" FontSize="12.5" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding SpaceTitle, StringFormat='Сейчас правится раскладка: {0}'}" Style="{StaticResource Muted}" FontSize="11.5" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                          IsChecked="{Binding ShowModel, Mode=TwoWay}" />
+                        </Grid>
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11.5" TextWrapping="Wrap" Margin="0,6,0,0"
+                                   Text="У режима с моделью и без неё свои положения и размеры элементов: переключатель меняет пространство, обе раскладки сохраняются отдельно." />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Glass}" Padding="12" Margin="0,8,0,0" CornerRadius="12">
+                    <StackPanel>
+                        <TextBlock Text="Расположение меню" FontSize="12.5" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap"
+                                   Text="Сверху или слева (слева выезжает при наведении мыши). Страницы подстраиваются сами." />
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" /><ColumnDefinition Width="6" /><ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Сверху" Height="34" Padding="0" HorizontalAlignment="Stretch" c:Ui.CornerRadius="12" FontSize="12"
+                                Command="{Binding SetNavLayoutCommand}" CommandParameter="top">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource GhostButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding NavTopActive}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Grid.Column="2" Content="Слева" Height="34" Padding="0" HorizontalAlignment="Stretch" c:Ui.CornerRadius="12" FontSize="12"
+                                Command="{Binding SetNavLayoutCommand}" CommandParameter="side">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource GhostButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding NavSideActive}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentOnBrush}" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Glass}" Padding="12" Margin="0,8,0,0" CornerRadius="12">
+                    <StackPanel>
+                        <TextBlock Text="Вкладки сверху" FontSize="12.5" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"
+                                   Text="Стрелки двигают вкладку, переключатель показывает или скрывает её. «Главную», «Настройки» и «Разработчика» скрыть нельзя. Вкладки можно и перетаскивать мышью наверху." />
+                        <ItemsControl ItemsSource="{Binding Tabs}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" FontSize="12.5" />
+                                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Content="&#xE70E;" Margin="0,0,6,0"
+                                                ToolTip="Раньше" Command="{Binding MoveUpCommand}" />
+                                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Content="&#xE70D;" Margin="0,0,14,0"
+                                                ToolTip="Позже" Command="{Binding MoveDownCommand}" />
+                                        <ToggleButton Grid.Column="3" Style="{StaticResource SwitchToggle}" VerticalAlignment="Center"
+                                                      IsChecked="{Binding IsVisible, Mode=TwoWay}" IsEnabled="{Binding CanHide}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Glass}" Padding="12" Margin="0,8,0,0" CornerRadius="12">
+                    <StackPanel>
+                        <TextBlock Text="Фон: своё изображение" FontSize="12.5" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding BackgroundImageText}" Style="{StaticResource Muted}" FontSize="11.5" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <Button Style="{StaticResource GhostButton}" Content="Выбрать…" Padding="14,6" FontSize="12" c:Ui.CornerRadius="11"
+                                    Margin="0,0,8,0" Command="{Binding ChooseBackgroundCommand}" />
+                            <Button Style="{StaticResource GhostButton}" Content="Убрать" Padding="14,6" FontSize="12" c:Ui.CornerRadius="11"
+                                    Command="{Binding RemoveBackgroundCommand}"
+                                    Visibility="{Binding HasBackgroundImage, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                        <Grid Margin="0,10,0,0" Visibility="{Binding HasBackgroundImage, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Margin="0,0,64,0">
+                                <TextBlock Text="Подстраивать интерфейс" FontSize="12" FontWeight="SemiBold" />
+                                <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap"
+                                           Text="Интерфейс сам становится светлым или тёмным под картинку: на белой фотографии текст тёмный. Сама картинка не меняется." />
+                            </StackPanel>
+                            <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                          IsChecked="{Binding BackgroundAuto, Mode=TwoWay}" />
+                        </Grid>
+                        <StackPanel Visibility="{Binding ShowManualDim, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Затемнить картинку" Style="{StaticResource Muted}" FontSize="11.5" Margin="0,8,0,0" />
+                            <Slider Minimum="0" Maximum="0.9" SmallChange="0.01" LargeChange="0.1" Value="{Binding BackgroundDim, Mode=TwoWay}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,6,0,0"
+                                   Text="PNG, JPG, BMP или GIF до 25 МБ. Копия хранится в папке лаунчера. Пока изображение стоит, фон-«дым» не показывается." />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Glass}" Padding="12" Margin="0,8,0,0" CornerRadius="12">
+                    <StackPanel>
+                        <TextBlock Text="Тема" FontSize="12.5" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap"
+                                   Text="Правки раскладки запоминаются под выбранной темой. Чтобы поделиться темой или сохранить её отдельно, нажмите кнопку: откроется окно с названием, описанием и цветом текста." />
+                        <Button Style="{StaticResource PrimaryButton}" Content="Сохранить тему…" Padding="14,7" FontSize="12" c:Ui.CornerRadius="11"
+                                HorizontalAlignment="Left" Margin="0,10,0,0" Click="OnSaveThemeClick" />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Style="{StaticResource Muted}" FontSize="11.5" TextWrapping="Wrap" Margin="0,8,0,0"
+                           Text="Порядок профилей: на главной и на странице профилей профиль можно перетащить мышью на новое место, порядок общий для обеих страниц." />
+                <TextBlock Style="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,10"
+                           Text="Перетаскивайте элементы мышью, вкладки сверху тоже; на другую страницу можно перейти прямо сейчас — правка работает на всех страницах, кроме режима разработчика. Здесь можно выбрать элемент и точно поменять каждое свойство. Что делает кнопка — не меняется." />
+                <ListBox Style="{StaticResource ChipListBox}" ItemsSource="{Binding Elements}"
+                         SelectedItem="{Binding Selected, Mode=TwoWay}">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Title}" FontSize="12" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <StackPanel Margin="0,12,0,0" Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
+                    <Grid>
+                        <TextBlock Text="Сдвиг по горизонтали" FontSize="12.5" />
+                        <TextBox Text="{Binding X, StringFormat={}{0:0}, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Right" Width="64" Padding="6,2" FontSize="12" />
+                    </Grid>
+                    <Slider Minimum="-600" Maximum="600" SmallChange="1" LargeChange="10" Value="{Binding X, Mode=TwoWay}" />
+                    <Grid>
+                        <TextBlock Text="Сдвиг по вертикали" FontSize="12.5" />
+                        <TextBox Text="{Binding Y, StringFormat={}{0:0}, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Right" Width="64" Padding="6,2" FontSize="12" />
+                    </Grid>
+                    <Slider Minimum="-600" Maximum="600" SmallChange="1" LargeChange="10" Value="{Binding Y, Mode=TwoWay}" />
+                    <Grid>
+                        <TextBlock Text="Слой (Z): больше — поверх" FontSize="12.5" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding Z, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Right" Width="64" Padding="6,2" FontSize="12" />
+                    </Grid>
+                    <Slider Minimum="-20" Maximum="20" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Z, Mode=TwoWay}" />
+                    <Grid>
+                        <TextBlock Text="Размер" FontSize="12.5" />
+                        <TextBox Text="{Binding Scale, StringFormat={}{0:0.00}, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Right" Width="64" Padding="6,2" FontSize="12" />
+                    </Grid>
+                    <Slider Minimum="0.3" Maximum="3" Value="{Binding Scale, Mode=TwoWay}" />
+                    <Grid>
+                        <TextBlock Text="Ширина (только вширь)" FontSize="12.5" />
+                        <TextBox Text="{Binding StretchX, StringFormat={}{0:0.00}, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Right" Width="64" Padding="6,2" FontSize="12" />
+                    </Grid>
+                    <Slider Minimum="0.3" Maximum="3" Value="{Binding StretchX, Mode=TwoWay}" />
+                    <Grid>
+                        <TextBlock Text="Высота (только вверх-вниз)" FontSize="12.5" />
+                        <TextBox Text="{Binding StretchY, StringFormat={}{0:0.00}, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Right" Width="64" Padding="6,2" FontSize="12" />
+                    </Grid>
+                    <Slider Minimum="0.3" Maximum="3" Value="{Binding StretchY, Mode=TwoWay}" />
+                    <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,6"
+                               Text="Тянуть можно и мышью: у выбранного элемента на серединах сторон есть ручки, каждая двигает только свою сторону." />
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,8">
+                        <Button Style="{StaticResource GhostButton}" Content="Меньше" Padding="14,6" FontSize="12" c:Ui.CornerRadius="11"
+                                Margin="0,0,8,0" Command="{Binding ScaleDownCommand}" ToolTip="Уменьшить на 10 %" />
+                        <Button Style="{StaticResource GhostButton}" Content="Больше" Padding="14,6" FontSize="12" c:Ui.CornerRadius="11"
+                                Margin="0,0,8,0" Command="{Binding ScaleUpCommand}" ToolTip="Увеличить на 10 %" />
+                        <Button Style="{StaticResource GhostButton}" Content="100 %" Padding="14,6" FontSize="12" c:Ui.CornerRadius="11"
+                                Command="{Binding ScaleResetCommand}" ToolTip="Вернуть обычный размер" />
+                    </StackPanel>
+                    <Grid>
+                        <TextBlock Text="Прозрачность" FontSize="12.5" />
+                        <TextBox Text="{Binding Opacity, StringFormat={}{0:0.00}, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Right" Width="64" Padding="6,2" FontSize="12" />
+                    </Grid>
+                    <Slider Minimum="0" Maximum="1" Value="{Binding Opacity, Mode=TwoWay}" />
+                    <Grid>
+                        <TextBlock Text="Скругление углов" FontSize="12.5" />
+                        <TextBox Text="{Binding Corner, StringFormat={}{0:0}, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Right" Width="64" Padding="6,2" FontSize="12" />
+                    </Grid>
+                    <Slider Minimum="0" Maximum="60" Value="{Binding Corner, Mode=TwoWay}" />
+                    <Grid Margin="0,6,0,0">
+                        <TextBlock Text="Показывать" FontSize="12.5" VerticalAlignment="Center" />
+                        <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right"
+                                      IsChecked="{Binding ElementVisible, Mode=TwoWay}" />
+                    </Grid>
+                </StackPanel>
+
+                <Grid Margin="0,12,0,0">
+                    <TextBlock Text="Сетка 10 px (привязка)" FontSize="12.5" VerticalAlignment="Center" />
+                    <ToggleButton Style="{StaticResource SwitchToggle}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding SnapToGrid, Mode=TwoWay}" />
+                </Grid>
+                <TextBlock Style="{StaticResource Muted}" FontSize="11.5" TextWrapping="Wrap" Margin="0,6,0,0"
+                           Text="Стрелки двигают выбранный элемент на 1 px (с Shift — на 10), Ctrl+Z / Ctrl+Y — отмена и повтор, Esc — выйти. Числа можно вписать точно." />
+
+                <WrapPanel Margin="0,14,0,0">
+                    <Button Style="{StaticResource GhostButton}" Content="Отменить" Padding="14,7" FontSize="12" c:Ui.CornerRadius="11"
+                            Margin="0,0,8,8" Command="{Binding UndoCommand}" />
+                    <Button Style="{StaticResource GhostButton}" Content="Повторить" Padding="14,7" FontSize="12" c:Ui.CornerRadius="11"
+                            Margin="0,0,8,8" Command="{Binding RedoCommand}" />
+                    <Button Style="{StaticResource PrimaryButton}" Content="Готово" Padding="14,7" FontSize="12" c:Ui.CornerRadius="11"
+                            Margin="0,0,8,8" Command="{Binding DoneCommand}" />
+                    <Button Style="{StaticResource GhostButton}" Content="Сбросить элемент" Padding="14,7" FontSize="12" c:Ui.CornerRadius="11"
+                            Margin="0,0,8,8" Command="{Binding ResetElementCommand}" />
+                    <Button Style="{StaticResource GhostButton}" Content="Сбросить всё" Padding="14,7" FontSize="12" c:Ui.CornerRadius="11"
+                            Margin="0,0,0,8" Command="{Binding ResetAllCommand}" />
+                </WrapPanel>
+            </StackPanel></ScrollViewer>
+        </Border>
+</UserControl>
